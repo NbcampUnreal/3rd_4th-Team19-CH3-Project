@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-TPSTeamProject.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\PhilJoon\UnrealProject\3rd_4th-Team19-CH3-Project\TPSTeamProject\Intermediate\Build\Win64\x64\TPSTeamProjectEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.h.obj"
+"D:\PhilJoon\UnrealProject\3rd_4th-Team19-CH3-Project\TPSTeamProject\Intermediate\Build\Win64\x64\UnrealEditor\Development\TPSTeamProject\TPSTeamProject.cpp.obj"
+"D:\PhilJoon\UnrealProject\3rd_4th-Team19-CH3-Project\TPSTeamProject\Intermediate\Build\Win64\x64\UnrealEditor\Development\TPSTeamProject\PerModuleInline.gen.cpp.obj"
+"D:\PhilJoon\UnrealProject\3rd_4th-Team19-CH3-Project\TPSTeamProject\Intermediate\Build\Win64\x64\UnrealEditor\Development\TPSTeamProject\Default.rc2.res"
+/OUT:"D:\PhilJoon\UnrealProject\3rd_4th-Team19-CH3-Project\TPSTeamProject\Intermediate\Build\Win64\x64\UnrealEditor\Development\TPSTeamProject\UnrealEditor-TPSTeamProject.lib"

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\TPSTeamProject.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\TPSTeamProject.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\TPSTeamProjectEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\TPSTeamProject">
+      <UniqueIdentifier>{CF086E74-328C-3A2E-A340-042A74A94DA7}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\TPSTeamProject\TPSTeamProject.Build.cs">
+      <Filter>Source\TPSTeamProject</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\TPSTeamProject\TPSTeamProject.cpp">
+      <Filter>Source\TPSTeamProject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\TPSTeamProject\TPSTeamProject.h">
+      <Filter>Source\TPSTeamProject</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

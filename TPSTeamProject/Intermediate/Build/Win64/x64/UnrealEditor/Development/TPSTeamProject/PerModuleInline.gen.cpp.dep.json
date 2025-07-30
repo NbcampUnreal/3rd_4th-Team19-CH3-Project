@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\philjoon\\unrealproject\\3rd_4th-team19-ch3-project\\tpsteamproject\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\tpsteamproject\\permoduleinline.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\philjoon\\unrealproject\\3rd_4th-team19-ch3-project\\tpsteamproject\\intermediate\\build\\win64\\x64\\tpsteamprojecteditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.h.pch",
+        "Includes": [
+            "d:\\philjoon\\unrealproject\\3rd_4th-team19-ch3-project\\tpsteamproject\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\tpsteamproject\\definitions.tpsteamproject.h",
+            "d:\\unrealengine\\ue_5.5\\engine\\source\\runtime\\core\\public\\hal\\permoduleinline.inl"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

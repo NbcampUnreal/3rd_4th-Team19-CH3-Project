@@ -1,0 +1,8 @@
+{
+	"SourceFiles": [
+		"D:\\PhilJoon\\UnrealProject\\3rd_4th-Team19-CH3-Project\\TPSTeamProject\\Source\\TPSTeamProject\\TPSTeamProject.Build.cs",
+		"D:\\PhilJoon\\UnrealProject\\3rd_4th-Team19-CH3-Project\\TPSTeamProject\\Source\\TPSTeamProject.Target.cs",
+		"D:\\PhilJoon\\UnrealProject\\3rd_4th-Team19-CH3-Project\\TPSTeamProject\\Source\\TPSTeamProjectEditor.Target.cs"
+	],
+	"EngineVersion": "5.5.4"
+}
