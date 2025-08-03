@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Manager/GameInstanceSubsystemManager.h"
+#include "GameData/CacheDataTable.h"
 #include "DataTableManager.generated.h"
 
 UENUM(BlueprintType)
@@ -20,11 +21,31 @@ public:
 
 	virtual void Init() override;
 
-	UDataTable* GetTable(EDataType);
+	UCacheDataTable* GetTable(EDataType);
+
+	template<typename T>
+	T* GetData(EDataType InType, int32 InKey)
+	{
+		UCacheDataTable* DataTable = GetTable(InType);
+
+		return DataTable->FindRow<T>(InKey, FString(TEXT("Find Row")));
+	}
 
 private:
-
 	UPROPERTY()
-	TMap<EDataType, TObjectPtr<class UDataTable>> DataTables;
+	TMap<EDataType, TObjectPtr<class UCacheDataTable>> DataTables;
+	
+	const FString TablePath = TEXT("/Game/Data/DataTables");
+
+	template<typename T>
+	void AddDataTable(EDataType InType, const FString& TableName)
+	{
+		UCacheDataTable* CacheTable = NewObject<UCacheDataTable>();
+		UDataTable* DataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *FPaths::Combine(*TablePath, *TableName)));
+
+		CacheTable->Init<T>(DataTable);
+
+		DataTables.Add(InType, CacheTable);
+	}
 	
 };
