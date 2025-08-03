@@ -1,0 +1,6 @@
+Name,Level,DefaultAtk,DefaultHP,DefaultDef
+Level_1,1,5,100,3
+Level_2,2,10,200,6
+Level_3,3,15,300,9
+Level_4,4,20,400,12
+Level_5,5,25,500,15
