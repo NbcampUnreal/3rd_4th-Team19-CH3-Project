@@ -17,6 +17,6 @@ class TPSTEAMPROJECT_API ITableKey
 public:
 	ITableKey() {}
 
-	virtual int GetKey() const = 0;
+	virtual int32 GetKey() const = 0;
 
 };

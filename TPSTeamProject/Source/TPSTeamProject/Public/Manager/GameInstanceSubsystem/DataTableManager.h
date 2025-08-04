@@ -40,7 +40,7 @@ private:
 	template<typename T>
 	void AddDataTable(EDataType InType, const FString& TableName)
 	{
-		UCacheDataTable* CacheTable = NewObject<UCacheDataTable>();
+		UCacheDataTable* CacheTable = NewObject<UCacheDataTable>(this);
 		UDataTable* DataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *FPaths::Combine(*TablePath, *TableName)));
 
 		CacheTable->Init<T>(DataTable);

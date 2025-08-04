@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character Data")
 	float DefaultDef;
 
-	virtual int GetKey() const override
+	virtual int32 GetKey() const override
 	{
 		return Level;
 	}
