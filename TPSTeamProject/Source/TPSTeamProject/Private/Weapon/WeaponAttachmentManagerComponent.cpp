@@ -1,5 +1,5 @@
-#include "WeaponAttachmentManagerComponent.h"
-#include "WeaponAttachmentDataAsset.h"
+#include "Weapon/WeaponAttachmentManagerComponent.h"
+#include "Weapon/WeaponAttachmentDataAsset.h"
 
 UWeaponAttachmentManagerComponent::UWeaponAttachmentManagerComponent()
 {
