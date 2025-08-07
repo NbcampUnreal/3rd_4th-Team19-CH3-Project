@@ -18,7 +18,6 @@ public:
 	void RemoveContainer(const struct FStatContainer* InContainer);
 
 private:
-	UPROPERTY()
 	TSet<struct FStatContainer*> StatContainers;
 	
 };
