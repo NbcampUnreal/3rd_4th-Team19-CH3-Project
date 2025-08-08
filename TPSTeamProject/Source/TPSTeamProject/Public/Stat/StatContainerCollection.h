@@ -19,7 +19,6 @@ public:
 	void EmptyContainer();
 
 private:
-	UPROPERTY()
 	TSet<struct FStatContainer*> StatContainers;
 	
 };
