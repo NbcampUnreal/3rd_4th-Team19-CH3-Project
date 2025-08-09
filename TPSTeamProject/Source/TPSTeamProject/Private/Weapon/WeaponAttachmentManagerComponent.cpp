@@ -13,15 +13,15 @@ void UWeaponAttachmentManagerComponent::EquipAttachment(UWeaponAttachmentDataAss
 		return;
 	}
 
-	// 부착물 스태틱 메시 컴포넌트 동적 생성
-	if (USkeletalMeshComponent* AttachmentMeshComponent = NewObject<USkeletalMeshComponent>(
-		GetOwner(), USkeletalMeshComponent::StaticClass()))
-	{
-		AttachmentMeshComponent->RegisterComponent();
-		AttachmentMeshComponent->SetSkeletalMesh(AttachmentData->AttachmentMesh);
-		AttachmentMeshComponent->AttachToComponent(GetOwner()->GetComponentByClass<USkeletalMeshComponent>(),
-		                                           FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		                                           AttachmentData->AttachmentSocketName);
-		AttachedComponents.Add(AttachmentMeshComponent);
-	}
+	// // 부착물 스태틱 메시 컴포넌트 동적 생성
+	// if (USkeletalMeshComponent* AttachmentMeshComponent = NewObject<USkeletalMeshComponent>(
+	// 	GetOwner(), USkeletalMeshComponent::StaticClass()))
+	// {
+	// 	AttachmentMeshComponent->RegisterComponent();
+	// 	AttachmentMeshComponent->SetSkeletalMesh(AttachmentData->AttachmentMesh);
+	// 	AttachmentMeshComponent->AttachToComponent(GetOwner()->GetComponentByClass<USkeletalMeshComponent>(),
+	// 	                                           FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+	// 	                                           AttachmentData->AttachmentSocketName);
+	// 	AttachedComponents.Add(AttachmentMeshComponent);
+	// }
 }

@@ -9,7 +9,8 @@ UENUM(BlueprintType)
 enum class EDataType : uint8
 {
 	Character UMETA(DisplayName = "Character"),
-	WeaponStat UMETA(DisplayName = "WeaponStat")
+	WeaponStat UMETA(DisplayName = "WeaponStat"),
+	WeaponAttachment UMETA(DisplayName = "WeaponAttachment")
 };
 
 UCLASS()

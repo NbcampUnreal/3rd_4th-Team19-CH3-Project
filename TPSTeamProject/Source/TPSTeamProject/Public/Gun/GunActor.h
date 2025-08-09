@@ -9,6 +9,7 @@ class USkeletalMeshComponent;
 class UCameraComponent;
 class UPointLightComponent;
 class UObjectTweenComponent;
+enum class EAttachmentSlot : uint8;
 
 UCLASS()
 class TPSTEAMPROJECT_API AGunActor : public AActor, public IStatable
@@ -32,7 +33,10 @@ public:
 	FORCEINLINE UCameraComponent* GetScopeCameraComp() const;
 
 	FORCEINLINE ACameraActor* GetSightCameraComp() const;
-
+	
+	// 부착물을 Slot에 따른 지정된 Index로 교체하는 함수
+	UFUNCTION(BlueprintCallable, Category = "Attachment Customization")
+	void SetAttachmentByIndex(EAttachmentSlot Slot, int32 Index);
 
 protected:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun")
@@ -92,6 +96,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<APlayerCameraManager> CameraManager;
 
+	TMap<EAttachmentSlot, TObjectPtr<USkeletalMeshComponent>> AttachmentCompMap;
+
 	UFUNCTION()
 	void OnFireLight();
 	UFUNCTION()
@@ -100,6 +106,9 @@ private:
 	void OnMuzzleParticle();
 	UFUNCTION()
 	void OffMuzzleParticle();
+
+	// 부착물 skeletal mesh 비동기로딩 함수
+	void LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index);
 
 	FCollisionQueryParams Params;
 };

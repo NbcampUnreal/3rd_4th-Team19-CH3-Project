@@ -12,6 +12,22 @@ enum class EModificationOp : uint8
 	Override		UMETA(DisplayName = "Override")
 };
 
+UENUM(BlueprintType)
+enum class EAttachmentSlot : uint8
+{
+	None,
+	Grip,
+	Hull,
+	MountMag,
+	Mag,
+	Scope,
+	Butt,
+	Handguard,
+	Barrel,
+	Muzzle,
+	GripAttachment
+};
+
 USTRUCT(BlueprintType)
 struct FStatModifier
 {

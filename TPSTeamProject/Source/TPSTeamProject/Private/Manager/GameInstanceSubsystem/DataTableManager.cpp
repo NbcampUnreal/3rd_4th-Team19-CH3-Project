@@ -1,6 +1,7 @@
 #include "Manager/GameInstanceSubsystem/DataTableManager.h"
 #include "GameData/CharacterDataStruct.h"
 #include "GameData/WeaponStatDataStruct.h"
+#include "GameData/WeaponAttachmentDataStruct.h"
 
 UDataTableManager::UDataTableManager()
 {
@@ -13,6 +14,7 @@ void UDataTableManager::Init()
 
 	AddDataTable<FCharacterDataStruct>(EDataType::Character, FString(TEXT("CharacterData.CharacterData")));
 	AddDataTable<FWeaponStatDataStruct>(EDataType::WeaponStat, FString(TEXT("WeaponStatData.WeaponStatData")));
+	AddDataTable<FWeaponAttachmentDataStruct>(EDataType::WeaponAttachment, FString(TEXT("WeaponAttachmentData.WeaponAttachmentData")));
 }
 
 UCacheDataTable* UDataTableManager::GetTable(EDataType InType)
