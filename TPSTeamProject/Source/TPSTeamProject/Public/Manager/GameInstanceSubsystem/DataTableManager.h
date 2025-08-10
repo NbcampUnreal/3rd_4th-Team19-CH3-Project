@@ -10,7 +10,7 @@ enum class EDataType : uint8
 {
 	Character UMETA(DisplayName = "Character"),
 	WeaponStat UMETA(DisplayName = "WeaponStat"),
-	WeaponAttachment UMETA(DisplayName = "WeaponAttachment")
+	WeaponAttachment UMETA(DisplayName = "WeaponAttachment"),
 	EnemyStat UMETA(DisplayName = "EnemyStat")
 };
 
