@@ -54,7 +54,7 @@ void ATestActor::BeginPlay()
 
 		StatContainerCollection->RemoveContainer(&StatContainer2);
 
-		UE_LOG(LogTemp, Log, TEXT("UUID : %d"), StatContainer1.GetUUID().GetUUID());
+		UE_LOG(LogTemp, Log, TEXT("UUID : %d"), StatContainer1.GetUUID().GetRealUUID());
 
 		UE_LOG(LogTemp, Log, TEXT("Atk : %lf, HP : %lf, Def : %lf"), StatContainerCollection->GetValue(EGameStatType::Atk), StatContainerCollection->GetValue(EGameStatType::HP), StatContainerCollection->GetValue(EGameStatType::Def));
 

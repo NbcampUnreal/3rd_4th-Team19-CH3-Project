@@ -1,0 +1,44 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameData/WeaponStatDataStruct.h"
+#include "WeaponTypes.generated.h"
+
+UENUM(BlueprintType)
+enum class EModificationOp : uint8
+{
+	Add				UMETA(DisplayName = "Add"),
+	Multiply		UMETA(DisplayName = "Multiply"),
+	Override		UMETA(DisplayName = "Override")
+};
+
+UENUM(BlueprintType)
+enum class EAttachmentSlot : uint8
+{
+	None,
+	Grip,
+	Hull,
+	MountMag,
+	Mag,
+	Scope,
+	Butt,
+	Handguard,
+	Barrel,
+	Muzzle,
+	GripAttachment
+};
+
+USTRUCT(BlueprintType)
+struct FStatModifier
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FWeaponStatDataStruct StatToModify;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	EModificationOp Operation;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Value;
+};

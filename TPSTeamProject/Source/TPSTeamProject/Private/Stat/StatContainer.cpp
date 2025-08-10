@@ -2,5 +2,5 @@
 
 uint32 GetTypeHash(const FStatContainer& InContainer)
 {
-	return InContainer.GetUUID().GetUUID();
+	return InContainer.GetUUID().GetRealUUID();
 }
