@@ -1,10 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Stat/Statable.h"
+#include "Stat/StatContainer.h"
 #include "GunActor.generated.h"
 
+struct FWeaponAttachmentDataStruct;
 class USkeletalMeshComponent;
 class UCameraComponent;
 class UPointLightComponent;
@@ -34,7 +36,6 @@ public:
 
 	FORCEINLINE ACameraActor* GetSightCameraComp() const;
 	
-	// 부착물을 Slot에 따른 지정된 Index로 교체하는 함수
 	UFUNCTION(BlueprintCallable, Category = "Attachment Customization")
 	void SetAttachmentByIndex(EAttachmentSlot Slot, int32 Index);
 
@@ -98,6 +99,9 @@ private:
 
 	TMap<EAttachmentSlot, TObjectPtr<USkeletalMeshComponent>> AttachmentCompMap;
 
+	UPROPERTY()
+	TMap<EAttachmentSlot, FStatContainer> EquippedAttachmentStats;
+
 	UFUNCTION()
 	void OnFireLight();
 	UFUNCTION()
@@ -107,8 +111,9 @@ private:
 	UFUNCTION()
 	void OffMuzzleParticle();
 
-	// 부착물 skeletal mesh 비동기로딩 함수
-	void LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index);
+	void UnEquipAttachment(EAttachmentSlot Slot);
+
+	void LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index, FWeaponAttachmentDataStruct* WeaponAttachmentDataRow);
 
 	FCollisionQueryParams Params;
 };

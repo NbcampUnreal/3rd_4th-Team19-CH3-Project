@@ -1,4 +1,4 @@
-#include "Gun/GunActor.h"
+﻿#include "Gun/GunActor.h"
 
 #include "TPSGameInstance.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -77,7 +77,6 @@ void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 관리용 맵(AttachmentCompMap) 초기화
 	AttachmentCompMap.Add(EAttachmentSlot::Grip, GripBaseComp);
 	AttachmentCompMap.Add(EAttachmentSlot::Hull, HullComp);
 	AttachmentCompMap.Add(EAttachmentSlot::Butt, ButtComp);
@@ -90,6 +89,11 @@ void AGunActor::BeginPlay()
 	AttachmentCompMap.Add(EAttachmentSlot::Mag, MagComp);
 
 	StatCollection = NewObject<UStatContainerCollection>();
+
+	for (TPair<EAttachmentSlot, TObjectPtr<USkeletalMeshComponent>>& mp  : AttachmentCompMap)
+	{
+		SetAttachmentByIndex(mp.Key, 1);
+	}
 
 	Params.AddIgnoredActor(this);
 
@@ -112,7 +116,6 @@ void AGunActor::BeginPlay()
 void AGunActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGunActor::Fire()
@@ -137,7 +140,8 @@ void AGunActor::Fire()
 	{
 		AActor* HitActor = HitResult.GetActor();
 
-		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %lf"), *HitActor->GetFName().ToString(), StatCollection->GetValue(EGameStatType::Atk));
+		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %lf"), *HitActor->GetFName().ToString(),
+		       StatCollection->GetValue(EGameStatType::Atk));
 	}
 
 	ShootFireTweenComp->PlayFromStart();
@@ -165,17 +169,6 @@ ACameraActor* AGunActor::GetSightCameraComp() const
 
 void AGunActor::SetAttachmentByIndex(EAttachmentSlot Slot, int32 Index)
 {
-	checkf(Slot!=EAttachmentSlot::None, TEXT("AGunActor::SetAttachmentByIndex : None Slot"));
-
-	// TODO: 파츠 교체할때 스탯 변경되면 기존부착물 스탯 먼저 제거
-
-	LoadAndSetAttachmentMesh(Slot, Index);
-
-	// TODO: 새 부착물 스탯적용
-}
-
-void AGunActor::LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index)
-{
 	UWorld* World = GetWorld();
 	checkf(World, TEXT("AGunActor::LoadAndSetAttachmentMesh : No World"));
 	UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
@@ -183,12 +176,37 @@ void AGunActor::LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index)
 	UDataTableManager* DataTableMgr = GameInstance->GetSubsystem<UDataTableManager>(ESubsystemType::DataTable);
 	checkf(DataTableMgr, TEXT("AGunActor::LoadAndSetAttachmentMesh : No DataTableMgr"));
 
-	//UDataTable* WeaponAttachmentDataTable = DataTableMgr->GetTable(EDataType::WeaponAttachment)->GetTable();
-
 	FWeaponAttachmentDataStruct* WeaponAttachmentDataRow = DataTableMgr->GetData<FWeaponAttachmentDataStruct>(
 		EDataType::WeaponAttachment, (Index << 16) + static_cast<int32>(Slot));
 	checkf(WeaponAttachmentDataRow, TEXT("AGunActor::LoadAndSetAttachmentMesh : No WeaponAttachmentData"));
 
+	checkf(Slot!=EAttachmentSlot::None, TEXT("AGunActor::SetAttachmentByIndex : None Slot"));
+
+	UnEquipAttachment(Slot);
+	UE_LOG(LogTemp, Log, TEXT("Atk : %lf, HP : %lf, Def : %lf"), StatCollection->GetValue(EGameStatType::Atk), StatCollection->GetValue(EGameStatType::HP), StatCollection->GetValue(EGameStatType::Def));
+
+	LoadAndSetAttachmentMesh(Slot, Index, WeaponAttachmentDataRow);
+	UE_LOG(LogTemp, Log, TEXT("Atk : %lf, HP : %lf, Def : %lf"), StatCollection->GetValue(EGameStatType::Atk), StatCollection->GetValue(EGameStatType::HP), StatCollection->GetValue(EGameStatType::Def));
+}
+
+void AGunActor::UnEquipAttachment(EAttachmentSlot Slot)
+{
+	checkf(StatCollection, TEXT("AGunActor::UnequipPart : No StatCollection"));
+
+	if (FStatContainer* ExistingStat = EquippedAttachmentStats.Find(Slot))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UnEquip:: ATK: %f, HP: %f"), ExistingStat->GetStatValue(EGameStatType::Atk), ExistingStat->GetStatValue(EGameStatType::HP));
+		StatCollection->RemoveContainer(ExistingStat);
+		EquippedAttachmentStats.Remove(Slot);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No StatContainer"));
+	}
+}
+
+void AGunActor::LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index, FWeaponAttachmentDataStruct* WeaponAttachmentDataRow)
+{
 	USkeletalMeshComponent* TargetComponent = AttachmentCompMap.FindRef(Slot);
 	checkf(TargetComponent, TEXT("AGunActor::LoadAndSetAttachmentMesh : No TargetComponent"));
 
@@ -208,6 +226,15 @@ void AGunActor::LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index)
 					TargetComponent->SetSkeletalMesh(LoadedMesh);
 				}
 			});
+
+		FStatContainer AttachmentStatContainer = FStatContainer();
+		for (const TPair<EGameStatType, double>& ModPair : WeaponAttachmentDataRow->StatModifiers)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : %f"), *UEnum::GetValueAsString(ModPair.Key), ModPair.Value);
+			AttachmentStatContainer.AddStat(ModPair.Key, ModPair.Value);
+		}
+		EquippedAttachmentStats.Add(Slot, AttachmentStatContainer);
+		StatCollection->AddContainer(&AttachmentStatContainer);
 	}
 }
 
@@ -256,5 +283,3 @@ void AGunActor::OffMuzzleParticle()
 		MuzzleParticleComp->SetVisibility(false);
 	}
 }
-
-
