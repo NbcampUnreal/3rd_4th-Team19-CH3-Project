@@ -5,6 +5,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Enemy/EnemyCharacter.h"
+#include "TPSGameInstance.h"
+#include "Manager/GameInstanceSubsystem/DataTableManager.h"
 
 AEnemyController::AEnemyController()
 {
@@ -30,6 +33,7 @@ void AEnemyController::BeginPlay()
 
 	if (AIPerception)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("AIPerception exists"));
 		AIPerception->OnTargetPerceptionUpdated.AddDynamic(
 			this,
 			&AEnemyController::OnPerceptionUpdated
@@ -46,6 +50,61 @@ void AEnemyController::BeginPlay()
 void AEnemyController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UDataTableManager* DataTableMgr = GameInstance->GetSubsystem<UDataTableManager>(ESubsystemType::DataTable);
+		FEnemyStatDataStruct* WalkerData = DataTableMgr->GetData<FEnemyStatDataStruct>(EDataType::EnemyStat, static_cast<int32>(EnemyType));
+
+		if (WalkerData)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("WalkerData Values:"));
+			UE_LOG(LogTemp, Warning, TEXT("  SightRadius: %f"), WalkerData->SightRadius);
+			UE_LOG(LogTemp, Warning, TEXT("  LoseSightRadius: %f"), WalkerData->LoseSightRadius);
+			UE_LOG(LogTemp, Warning, TEXT("  PeripheralVisionAngleDegrees: %f"), WalkerData->PeripheralVisionAngleDegress);
+			UE_LOG(LogTemp, Warning, TEXT("  SightMaxAge: %f"), WalkerData->SightMaxAge);
+			UE_LOG(LogTemp, Warning, TEXT("  HearingRange: %f"), WalkerData->HearingRange);
+			UE_LOG(LogTemp, Warning, TEXT("  LoSHearingRange: %f"), WalkerData->LoSHearingRange);
+			UE_LOG(LogTemp, Warning, TEXT("  HearingMaxAge: %f"), WalkerData->HearingMaxAge);
+
+			SightConfig->SightRadius = WalkerData->SightRadius;
+			SightConfig->LoseSightRadius = WalkerData->LoseSightRadius;
+			SightConfig->PeripheralVisionAngleDegrees = WalkerData->PeripheralVisionAngleDegress;
+			SightConfig->SetMaxAge(WalkerData->SightMaxAge);
+
+			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+			SightConfig->DetectionByAffiliation.bDetectNeutrals = true;  //팀 ID 설정후 삭제
+			SightConfig->DetectionByAffiliation.bDetectFriendlies = true; //팀 ID 설정 후 삭제
+
+			HearingConfig->HearingRange = WalkerData->HearingRange;
+			HearingConfig->LoSHearingRange = WalkerData->LoSHearingRange;
+			HearingConfig->SetMaxAge(WalkerData->HearingMaxAge);
+
+			HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+			HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;  //팀 ID 설정후 삭제
+			HearingConfig->DetectionByAffiliation.bDetectFriendlies = true; //팀 ID 설정 후 삭제
+
+			UE_LOG(LogTemp, Warning, TEXT("SightConfig Values:"));
+			UE_LOG(LogTemp, Warning, TEXT("  SightRadius: %f"), SightConfig->SightRadius);
+			UE_LOG(LogTemp, Warning, TEXT("  LoseSightRadius: %f"), SightConfig->LoseSightRadius);
+			UE_LOG(LogTemp, Warning, TEXT("  PeripheralVisionAngleDegrees: %f"), SightConfig->PeripheralVisionAngleDegrees);
+			UE_LOG(LogTemp, Warning, TEXT("  SightMaxAge: %f"), SightConfig->GetMaxAge());
+
+			UE_LOG(LogTemp, Warning, TEXT("HearingConfig Values:"));
+			UE_LOG(LogTemp, Warning, TEXT("  HearingRange: %f"), HearingConfig->HearingRange);
+			UE_LOG(LogTemp, Warning, TEXT("  LoSHearingRange: %f"), HearingConfig->LoSHearingRange);
+			UE_LOG(LogTemp, Warning, TEXT("  HearingMaxAge: %f"), HearingConfig->GetMaxAge());
+
+			AIPerception->ConfigureSense(*SightConfig);
+			AIPerception->ConfigureSense(*HearingConfig);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("WalkerData is NULL!"));
+		}
+	}
 }
 
 void AEnemyController::StartBehaviorTree()
@@ -62,6 +121,23 @@ void AEnemyController::StartBehaviorTree()
 
 void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+
+	FString SenseName = TEXT("Unknown");
+
+	if (Stimulus.Type == UAISense_Sight::StaticClass()->GetDefaultObject<UAISense>()->GetSenseID())
+	{
+		SenseName = TEXT("Sight");
+	}
+	else if (Stimulus.Type == UAISense_Hearing::StaticClass()->GetDefaultObject<UAISense>()->GetSenseID())
+	{
+		SenseName = TEXT("Hearing");
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[Perception] Actor: %s, Sense: %s, Success: %d"),
+		*GetNameSafe(Actor),
+		*SenseName,
+		Stimulus.WasSuccessfullySensed());
+
 	if (!BlackboardComp) return;
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
@@ -74,12 +150,20 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			{
 				BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), true);
-				//add AI speed
+				if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
+				{
+					AICharacter->SetMovementSpeed(AICharacter->RunSpeed);
+				}
+				UE_LOG(LogTemp, Warning, TEXT("Sight Succeed"));
+
 			}
 			else
 			{
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), false);
-				//add AI speed
+				if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
+				{
+					AICharacter->SetMovementSpeed(AICharacter->WalkSpeed);
+				}
 			}
 		}
 	}
@@ -90,6 +174,7 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 		{
 			BlackboardComp->SetValueAsVector(TEXT("HeardLocation"), Stimulus.StimulusLocation);
 			BlackboardComp->SetValueAsBool(TEXT("HeardNoise"), true);
+			UE_LOG(LogTemp, Warning, TEXT("HeardNoise Succeed"));
 		}
 	}
 }

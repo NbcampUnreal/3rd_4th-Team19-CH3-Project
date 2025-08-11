@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 //#include "GenericTeamAgentInterface.h"  //팀 ID 설정
 #include "Components/CapsuleComponent.h"
+#include "GameData/EnemyStatDataStruct.h"
 #include "EnemyCharacter.generated.h"
 
 UCLASS()
@@ -23,6 +24,10 @@ public:
 	UCapsuleComponent* RightArmCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* LeftArmCollision;
+
+	//데이터타입
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataType")
+	EEnemyType EnemyType;
 
 	//애니 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")

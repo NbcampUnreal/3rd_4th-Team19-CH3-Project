@@ -4,6 +4,7 @@
 #include "AIController.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "GameData/EnemyStatDataStruct.h"
 #include "EnemyController.generated.h"
 
 class UAIPereptionComponent;
@@ -25,6 +26,9 @@ protected:
 	UAISenseConfig_Sight* SightConfig;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAISenseConfig_Hearing* HearingConfig;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DataType")
+	EEnemyType EnemyType;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UBlackboardComponent* BlackboardComp;

@@ -3,6 +3,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TPSGameInstance.h"
+#include "Manager/GameInstanceSubsystem/DataTableManager.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -26,6 +28,25 @@ AEnemyCharacter::AEnemyCharacter()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UDataTableManager* DataTableMgr = GameInstance->GetSubsystem<UDataTableManager>(ESubsystemType::DataTable);
+		FEnemyStatDataStruct* WalkerData = DataTableMgr->GetData<FEnemyStatDataStruct>(EDataType::EnemyStat, static_cast<int32>(EnemyType));
+
+		if (WalkerData)
+		{
+			Health = WalkerData->DefaultHP;
+			Damage = WalkerData->DefaultAtk;
+			WalkSpeed = WalkerData->WalkSpeed;
+			RunSpeed = WalkerData->RunSpeed;
+		}
+	}
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	Movement->MaxWalkSpeed = WalkSpeed;
 
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)

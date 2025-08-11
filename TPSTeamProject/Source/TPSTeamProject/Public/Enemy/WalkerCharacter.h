@@ -13,8 +13,4 @@ class TPSTEAMPROJECT_API AWalkerCharacter : public AEnemyCharacter //,public IGe
 
 public:
 	AWalkerCharacter();
-
-protected:
-	virtual void BeginPlay() override;
-
 };

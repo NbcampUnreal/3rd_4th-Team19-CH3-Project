@@ -5,6 +5,15 @@
 #include "TableKey.h"
 #include "EnemyStatDataStruct.generated.h"
 
+UENUM(BlueprintType)
+enum class EEnemyType : uint8
+{
+	Walker,
+	Spitter,
+	Brute,
+	Screamer,
+	Cloaker
+};
 
 USTRUCT(BlueprintType)
 struct TPSTEAMPROJECT_API FEnemyStatDataStruct : public FTableRowBase, public ITableKey
@@ -13,8 +22,7 @@ struct TPSTEAMPROJECT_API FEnemyStatDataStruct : public FTableRowBase, public IT
 
 public:
 	FEnemyStatDataStruct()
-		: KeyNumber(1)
-		, Type("")
+		: Type(EEnemyType::Walker)
 		, DefaultAtk(0.f)
 		, DefaultHP(0.f)
 		, WalkSpeed (0.f)
@@ -32,9 +40,7 @@ public:
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyStat Data")
-	int32 KeyNumber;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyStat Data")
-	FString Type;
+	EEnemyType Type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyStat Data")
 	float DefaultAtk;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemyStat Data")
@@ -62,7 +68,7 @@ public:
 
 	virtual int32 GetKey() const override
 	{
-		return KeyNumber;
+		return static_cast<int32>(Type);
 	}
 
 };
