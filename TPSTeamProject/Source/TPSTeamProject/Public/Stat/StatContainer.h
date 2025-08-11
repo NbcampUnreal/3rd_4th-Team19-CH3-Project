@@ -58,7 +58,7 @@ public:
 		return UUID == InContainer.UUID;
 	}
 
-	FUUID GetUUID() const
+	FORCEINLINE FUUID GetUUID() const
 	{
 		return UUID;
 	}

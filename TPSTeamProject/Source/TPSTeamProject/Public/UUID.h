@@ -17,7 +17,7 @@ public:
 		return UUID;
 	}
 
-	uint32 GetUUID() const
+	uint32 GetRealUUID() const
 	{
 		return realUUID;
 	}

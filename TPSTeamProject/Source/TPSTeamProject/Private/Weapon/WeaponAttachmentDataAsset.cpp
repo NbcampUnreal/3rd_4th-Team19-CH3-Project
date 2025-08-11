@@ -1,0 +1,2 @@
+#include "Weapon/WeaponAttachmentDataAsset.h"
+
