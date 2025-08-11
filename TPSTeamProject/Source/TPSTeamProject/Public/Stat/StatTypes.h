@@ -8,5 +8,3 @@ enum class EGameStatType : uint8
 	Def,
 	Stamina,
 };
-
-TArray<EGameStatType> GetStatTypes();

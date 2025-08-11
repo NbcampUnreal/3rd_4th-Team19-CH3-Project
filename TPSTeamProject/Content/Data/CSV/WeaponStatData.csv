@@ -1,6 +1,0 @@
-Name,Damage,RateOfFire,MagazineSize,ReloadSpeed,Type
-AssaultRifle,26,650,40,2.6,AssaultRifle
-SubmachineGun,16,800,30,2.2,SubmachineGun
-ShotGun,48,0,6,0.6,ShotGun
-SniperRifle,108,0,5,2.5,SniperRifle
-Pistol,30,0,15,1.8,Pistol

@@ -14,9 +14,8 @@ public:
 	UStatContainerCollection();
 
 	void AddContainer(struct FStatContainer* InContainer);
-	void RemoveContainer(const struct FStatContainer* InContainer);
 	double GetValue(EGameStatType InType);
-	void EmptyContainer();
+	void RemoveContainer(const struct FStatContainer* InContainer);
 
 private:
 	TSet<struct FStatContainer*> StatContainers;
