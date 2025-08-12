@@ -82,6 +82,8 @@ void UObjectTweenComponent::AddBoolEvent(UObject* InObject, const FName& UpdateF
 
 void UObjectTweenComponent::PlayFromStart()
 {
+	//Super::PlayFromStart();
+
 	if (IsValid(TweenTimelineComp) == false)
 	{
 		return;
@@ -92,6 +94,8 @@ void UObjectTweenComponent::PlayFromStart()
 
 void UObjectTweenComponent::EndPlay(EEndPlayReason::Type InType)
 {
+	Super::EndPlay(InType);
+
 	if (TweenTimelineComp->HasBegunPlay() == false)
 	{
 		return;

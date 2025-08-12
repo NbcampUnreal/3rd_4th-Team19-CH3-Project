@@ -71,6 +71,11 @@ AGunActor::AGunActor()
 
 	ShootFireTweenComp = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ShootFireTweenComp"));
 	ShootFireParticleTweenComp = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ShootFireParticleTweenComp"));
+
+	SetMeshToScope();
+	TweakPlasticColorToScope();
+	SetVisibilityToScope();
+	ApplyPaintTextureToScope();
 }
 
 void AGunActor::BeginPlay()
@@ -257,4 +262,58 @@ void AGunActor::OffMuzzleParticle()
 	}
 }
 
+void AGunActor::SetMeshToScope()
+{
+	if (!ScopeComp)
+	{
+		return;
+	}
+
+	ScopeComp->SetSkinnedAssetAndUpdate(ScopeComp->GetSkeletalMeshAsset(), true);
+}
+
+void AGunActor::TweakPlasticColorToScope()
+{
+	if (!ScopeComp)
+	{
+		return;
+	}
+
+	UMaterialInterface* ScopeMaterial = ScopeComp->GetMaterial(0);
+	if (UMaterialInstanceDynamic* ScopeMaterialInstance = ScopeComp->CreateDynamicMaterialInstance(0, ScopeMaterial))
+	{
+		ScopeMaterialInstance->SetVectorParameterValue(FName(TEXT("PlasticTint")), FVector4(0.192708, 0.172001, 0.148152, 0));
+	}
+}
+
+void AGunActor::SetVisibilityToScope()
+{
+	if (!ScopeComp)
+	{
+		return;
+	}
+
+	ScopeComp->SetVisibility(true);
+}
+
+void AGunActor::ApplyPaintTextureToScope()
+{
+	if (!ScopeComp)
+	{
+		return;
+	}
+
+	UMaterialInterface* ScopeMaterial = ScopeComp->GetMaterial(0);
+	if (UMaterialInstanceDynamic* ScopeMaterialInstance = ScopeComp->CreateDynamicMaterialInstance(0, ScopeMaterial))
+	{
+		if (CamoTexture)
+		{
+			ScopeMaterialInstance->SetTextureParameterValue(FName(TEXT("Tile")), CamoTexture);
+		}
+
+		ScopeMaterialInstance->SetVectorParameterValue(FName(TEXT("Paint_Tint")), FVector4(0.5f, 0.5f, 0.5f, 0.f));
+		ScopeMaterialInstance->SetScalarParameterValue(FName(TEXT("PaintClamp")), 1.f);
+	}
+
+}
 

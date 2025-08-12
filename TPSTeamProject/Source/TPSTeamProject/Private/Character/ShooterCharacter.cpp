@@ -91,6 +91,43 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		if (AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController()))
 		{
+			ensure(PlayerController->MoveAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->MoveAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AShooterCharacter::Move
+				);
+			}
+
+			ensure(PlayerController->LookAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->LookAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AShooterCharacter::Look
+				);
+			}
+
+			ensure(PlayerController->JumpAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->JumpAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AShooterCharacter::StartJump
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->JumpAction,
+					ETriggerEvent::Completed,
+					this,
+					&AShooterCharacter::StopJump
+				);
+			}
+
 			ensure(PlayerController->ShootAction);
 			{
 				EnhancedInput->BindAction(
@@ -105,23 +142,6 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					ETriggerEvent::Completed,
 					this,
 					&AShooterCharacter::StopShooting
-				);
-			}
-
-			ensure(PlayerController->CloseContactAction);
-			{
-				EnhancedInput->BindAction(
-					PlayerController->CloseContactAction,
-					ETriggerEvent::Ongoing,
-					this,
-					&AShooterCharacter::StartCloseContact
-				);
-
-				EnhancedInput->BindAction(
-					PlayerController->CloseContactAction,
-					ETriggerEvent::Completed,
-					this,
-					&AShooterCharacter::EndCloseContact
 				);
 			}
 
@@ -155,6 +175,49 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
+void AShooterCharacter::Move(const FInputActionValue& value)
+{
+	const FVector Direction = value.Get<FVector>();
+	/*if (Direction.IsNearlyZero(0.f))
+	{
+		return;
+	}*/
+
+	if (FMath::IsNearlyZero(Direction.X) == false)
+	{
+		AddMovementInput(GetActorForwardVector() * Direction.X, 5.f);
+	}
+
+	if (FMath::IsNearlyZero(Direction.Y) == false)
+	{
+		AddMovementInput(GetActorRightVector() * Direction.Y, 5.f);
+	}
+}
+
+void AShooterCharacter::Look(const FInputActionValue& value)
+{
+	FVector2D LookInput = value.Get<FVector2D>();
+
+	AddControllerYawInput(LookInput.X);
+	AddControllerPitchInput(LookInput.Y);
+}
+
+void AShooterCharacter::StartJump(const FInputActionValue& value)
+{
+	if (value.Get<bool>())
+	{
+		Jump();
+	}
+}
+
+void AShooterCharacter::StopJump(const FInputActionValue& value)
+{
+	if (!value.Get<bool>())
+	{
+		StopJumping();
+	}
+}
+
 void AShooterCharacter::Shooting(const FInputActionValue& value)
 {
 	/*bool bShootTrigger = value.Get<bool>();
@@ -185,7 +248,7 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 	GetWorldTimerManager().SetTimer(
 		AutoShootTimerHandle,
 		ShootDelegate,
-		0.2f,
+		0.1f,
 		true
 	);
 }
@@ -282,7 +345,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			ensure(PlayerController);
 
-			PlayerController->SetViewTargetWithBlend(GunActor, 0.4f);
+			PlayerController->SetViewTargetWithBlend(GunActor, 0.1f);
 
 			bIsZoom = true;
 		}
@@ -292,7 +355,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			ensure(PlayerController);
 
-			PlayerController->SetViewTargetWithBlend(this, 0.4f);
+			PlayerController->SetViewTargetWithBlend(this, 0.1f);
 
 			bIsZoom = false;
 		}

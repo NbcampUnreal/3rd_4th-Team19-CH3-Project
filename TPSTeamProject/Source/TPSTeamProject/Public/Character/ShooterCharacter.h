@@ -38,6 +38,18 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveValue")
+	float InputDirectionAngle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	bool bIsShoot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	bool bIsAuto;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	bool bIsZoom;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	bool bIsCloseContact;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -46,6 +58,14 @@ public:
 
 private:
 
+	UFUNCTION()
+	void Move(const FInputActionValue& value);
+	UFUNCTION()
+	void Look(const FInputActionValue& value);
+	UFUNCTION()
+	void StartJump(const FInputActionValue& value);
+	UFUNCTION()
+	void StopJump(const FInputActionValue& value);
 	UFUNCTION()
 	void Shooting(const FInputActionValue& value);
 	UFUNCTION()
@@ -64,11 +84,6 @@ private:
 	void ZoomTimelineUpdate(float InValue);
 	UFUNCTION()
 	void ZoomTimelineFinished();
-
-	bool bIsShoot;
-	bool bIsAuto;
-	bool bIsZoom;
-	bool bIsCloseContact;
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;
