@@ -41,4 +41,10 @@ struct FStatModifier
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Value;
+
+	FStatModifier()
+		: Operation(EModificationOp::Add)
+		, Value(0.0f)
+	{
+	}
 };
