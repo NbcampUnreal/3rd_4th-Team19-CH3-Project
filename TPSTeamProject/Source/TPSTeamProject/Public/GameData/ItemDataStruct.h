@@ -22,6 +22,7 @@ public:
 	FItemDataStruct()
 		: Index(1)
 		, ItemType(EItemType::Coin)
+		, StackSize(0)
 		, ItemIconTexture(nullptr)
 		, WorldMesh(nullptr)
 	{
@@ -31,6 +32,8 @@ public:
 	int32 Index;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	EItemType ItemType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	int32 StackSize;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TSoftObjectPtr<UTexture2D> ItemIconTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")

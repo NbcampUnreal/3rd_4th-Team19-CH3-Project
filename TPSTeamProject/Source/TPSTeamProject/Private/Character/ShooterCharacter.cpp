@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Taeyeon/InventoryComponent.h"
 #include "Util/Component/ObjectTweenComponent.h"
 
 AShooterCharacter::AShooterCharacter()
@@ -21,6 +22,7 @@ AShooterCharacter::AShooterCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	ZoomTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ZoomTween"));
+	InventorySystem = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 
 	bIsZoom = false;
 	bIsAuto = false;

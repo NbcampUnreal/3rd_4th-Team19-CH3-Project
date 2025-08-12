@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class UInventoryComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
@@ -31,6 +32,8 @@ public:
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timeline")
 	TObjectPtr<UCurveFloat> ZoomCurveFloat;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TObjectPtr<UInventoryComponent> InventorySystem;
 
 protected:
 	virtual void BeginPlay() override;
