@@ -11,7 +11,4 @@ class TPSTEAMPROJECT_API AWalkerController : public AEnemyController
 
 public:
 	AWalkerController();
-
-protected:
-	//virtual void OnPossess(APawn* InPawn) override;
 };
