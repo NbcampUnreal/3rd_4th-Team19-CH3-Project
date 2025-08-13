@@ -59,7 +59,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int32 InventorySize = 20;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
-	bool bIsAddFailed = false;
-
 };
