@@ -9,6 +9,7 @@ AShootPlayerController::AShootPlayerController()
 	, ShootAction(nullptr)
 	, ZoomAction(nullptr)
 	, TurnAutoAction(nullptr)
+	, InteractionAction(nullptr)
 {
 
 }

@@ -31,6 +31,8 @@ public:
 	TObjectPtr<UInputAction> ZoomAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> TurnAutoAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputAction> InteractionAction;
 
 
 protected:

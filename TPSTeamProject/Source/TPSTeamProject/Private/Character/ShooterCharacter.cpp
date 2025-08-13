@@ -7,6 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "Taeyeon/InventoryComponent.h"
 #include "Util/Component/ObjectTweenComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "KHY/Interactable/Interactable.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -169,6 +171,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					ETriggerEvent::Started,
 					this,
 					&AShooterCharacter::TurnAuto
+				);
+			}
+
+			ensure(PlayerController->InteractionAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->InteractionAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AShooterCharacter::Interaction
 				);
 			}
 		}
@@ -398,6 +410,48 @@ void AShooterCharacter::ZoomTimelineFinished()
 	else
 	{
 		SpringArmComp->TargetArmLength = 200.f;
+	}
+}
+
+void AShooterCharacter::Interaction()
+{
+	TArray<FHitResult> OutHits;
+	FVector MyLocation = GetActorLocation();
+
+	bool bHit = UKismetSystemLibrary::SphereTraceMulti(
+		GetWorld(),
+		MyLocation,
+		MyLocation,
+		200.f,
+		UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		false,
+		{ this },
+		EDrawDebugTrace::ForDuration,
+		OutHits,
+		true
+	);
+
+	if (bHit)
+	{
+		for (const auto& Hit : OutHits)
+		{
+			UPrimitiveComponent* HitComponent = Hit.GetComponent();
+			if (HitComponent)
+			{
+				if (HitComponent && HitComponent->ComponentTags.Contains(TEXT("Interaction")))
+				{
+					AActor* HitActor = Hit.GetActor();
+					IInteractable* InteractableActor = Cast<IInteractable>(HitActor);
+
+					if (InteractableActor && HitActor)
+					{
+						//IInteractable::Execute(HitActor, this);
+						InteractableActor->Interact(this);
+						break;
+					}
+				}
+			}
+		}
 	}
 }
 
