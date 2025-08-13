@@ -81,6 +81,8 @@ private:
 	void ZoomTimelineUpdate(float InValue);
 	UFUNCTION()
 	void ZoomTimelineFinished();
+	UFUNCTION()
+	void Interaction();
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;
