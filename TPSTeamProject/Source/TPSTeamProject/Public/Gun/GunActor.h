@@ -84,6 +84,17 @@ protected:
 	TObjectPtr<UParticleSystem> MuzzleParticle;
 	UPROPERTY()
 	TObjectPtr<class UParticleSystemComponent> MuzzleParticleComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ScopeTexture")
+	TObjectPtr<class UTexture> CamoTexture;
+
+	UFUNCTION(BlueprintCallable)
+	void SetMeshToScope();
+	UFUNCTION(BlueprintCallable)
+	void TweakPlasticColorToScope();
+	UFUNCTION(BlueprintCallable)
+	void SetVisibilityToScope();
+	UFUNCTION(BlueprintCallable)
+	void ApplyPaintTextureToScope();
 
 private:
 	UPROPERTY()

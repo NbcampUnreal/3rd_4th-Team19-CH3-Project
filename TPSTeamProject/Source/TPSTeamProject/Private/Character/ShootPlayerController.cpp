@@ -3,8 +3,10 @@
 
 AShootPlayerController::AShootPlayerController()
 	: InputMappingContext(nullptr)
+	, MoveAction(nullptr)
+	, LookAction(nullptr)
+	, JumpAction(nullptr)
 	, ShootAction(nullptr)
-	, CloseContactAction(nullptr)
 	, ZoomAction(nullptr)
 	, TurnAutoAction(nullptr)
 {
