@@ -26,6 +26,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	AShooterCharacter* PlayerCharacter;
+	TWeakObjectPtr<ACharacter> PlayerCharacter;
 
 };

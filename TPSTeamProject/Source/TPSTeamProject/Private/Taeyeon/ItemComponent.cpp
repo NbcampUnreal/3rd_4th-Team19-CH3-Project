@@ -6,8 +6,8 @@
 UItemComponent::UItemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	ItemQuantity = 1;
-	ItemID = NAME_None;
+	Amount = 1;
+	ItemName = NAME_None;
 }
 
 void UItemComponent::BeginPlay()
@@ -22,7 +22,7 @@ void UItemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 void UItemComponent::Interact(ACharacter* PlayerCharacter)
 {
-	check(!ItemID.IsNone());
+	check(!ItemName.IsNone());
 	
 	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(PlayerCharacter);
 	if (ShooterCharacter == nullptr) return;
@@ -30,7 +30,7 @@ void UItemComponent::Interact(ACharacter* PlayerCharacter)
 	UInventoryComponent* InventorySystem = ShooterCharacter->GetComponentByClass<UInventoryComponent>();
 	check(InventorySystem);
 	
-	InventorySystem->AddItem(ItemID, ItemQuantity);
+	InventorySystem->AddItem(ItemName, Amount);
 	
 	GetOwner()->Destroy();
 }

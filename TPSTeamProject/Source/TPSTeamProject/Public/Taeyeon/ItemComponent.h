@@ -24,7 +24,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	FName ItemID;
+	FName ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	int32 ItemQuantity;
+	int32 Amount;
 };
