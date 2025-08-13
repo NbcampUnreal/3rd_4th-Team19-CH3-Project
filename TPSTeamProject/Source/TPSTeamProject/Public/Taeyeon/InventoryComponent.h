@@ -12,11 +12,17 @@ struct FInventorySlot
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName ItemID;
+	FInventorySlot()
+		:ItemName(NAME_None)
+		, Amount(0)
+	{
+	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Quantity;
+	FName ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Amount;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
@@ -30,10 +36,10 @@ public:
 	UInventoryComponent();
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void AddItem(FName ItemID, int32 Quantity);
+	bool AddItem(FName ItemName, int32 Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void RemoveItem(FName ItemID, int32 Quantity);
+	void RemoveItem(FName ItemName, int32 Amount);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
@@ -42,13 +48,18 @@ public:
 	const TArray<FInventorySlot>& GetInventory() const { return Inventory; }
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UDataTable> ItemDataTable;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TArray<FInventorySlot> Inventory;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int32 InventorySize = 20;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	bool bIsAddFailed = false;
 
 };
