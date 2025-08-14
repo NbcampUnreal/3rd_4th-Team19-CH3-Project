@@ -1,14 +1,14 @@
-#include "Enemy/Task/BTTask_Rush.h"
+#include "Enemy/Task/BTTask_MoveToRunSpeed.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Enemy/EnemyCharacter.h"
 
-UBTTask_Rush::UBTTask_Rush()
+UBTTask_MoveToRunSpeed::UBTTask_MoveToRunSpeed()
 {
-	NodeName = TEXT("Rush To Player");
+	NodeName = TEXT("Move To Run Speed");
 }
 
-EBTNodeResult::Type UBTTask_Rush::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_MoveToRunSpeed::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
@@ -32,7 +32,7 @@ EBTNodeResult::Type UBTTask_Rush::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	return Result;
 }
 
-void UBTTask_Rush::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+void UBTTask_MoveToRunSpeed::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 
@@ -41,7 +41,7 @@ void UBTTask_Rush::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	APawn* AIPawn = AIController->GetPawn();
 
 	AEnemyCharacter* AIChar = Cast<AEnemyCharacter>(AIPawn);
-	
+
 	if (BlackboardComp && AIChar)
 	{
 		BlackboardComp->SetValueAsBool(TEXT("TaskRunning"), false);

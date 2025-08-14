@@ -1,14 +1,14 @@
-#include "Enemy/Task/BTTask_AttackPlayer.h"
+#include "Enemy/Task/BTTask_UseAnimMontage.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "Enemy/EnemyCharacter.h"
 
-UBTTask_AttackPlayer::UBTTask_AttackPlayer()
+UBTTask_UseAnimMontage::UBTTask_UseAnimMontage()
 {
-	NodeName = TEXT("Attack Player");
+	NodeName = TEXT("Use Anim Montage");
 }
 
-EBTNodeResult::Type UBTTask_AttackPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_UseAnimMontage::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComp) return EBTNodeResult::Failed;
@@ -22,10 +22,10 @@ EBTNodeResult::Type UBTTask_AttackPlayer::ExecuteTask(UBehaviorTreeComponent& Ow
 	AEnemyCharacter* AIChar = Cast<AEnemyCharacter>(AIPawn);
 	if (!AIChar) return EBTNodeResult::Failed;
 
-	if (AttackMontages.Num() > 0)
+	if (AnimMontages.Num() > 0)
 	{
-		int32 RandomIndex = FMath::RandRange(0, AttackMontages.Num() - 1);
-		UAnimMontage* SelectedMontage = AttackMontages[RandomIndex];
+		int32 RandomIndex = FMath::RandRange(0, AnimMontages.Num() - 1);
+		UAnimMontage* SelectedMontage = AnimMontages[RandomIndex];
 
 		if (SelectedMontage)
 		{
@@ -33,12 +33,11 @@ EBTNodeResult::Type UBTTask_AttackPlayer::ExecuteTask(UBehaviorTreeComponent& Ow
 			if (AnimInstance)
 			{
 				FOnMontageEnded OnMontageEndedDelegate;
-				OnMontageEndedDelegate.BindUObject(this, &UBTTask_AttackPlayer::OnMontageEnded, &OwnerComp);
+				OnMontageEndedDelegate.BindUObject(this, &UBTTask_UseAnimMontage::OnMontageEnded, &OwnerComp);
 
 				AnimInstance->Montage_Play(SelectedMontage);
 				AnimInstance->Montage_SetEndDelegate(OnMontageEndedDelegate, SelectedMontage);
 
-				UE_LOG(LogTemp, Warning, TEXT("Playing attack montage at index %d"), RandomIndex);
 				return EBTNodeResult::InProgress;
 			}
 		}
@@ -47,7 +46,7 @@ EBTNodeResult::Type UBTTask_AttackPlayer::ExecuteTask(UBehaviorTreeComponent& Ow
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_AttackPlayer::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted, UBehaviorTreeComponent* OwnerComp)
+void UBTTask_UseAnimMontage::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted, UBehaviorTreeComponent* OwnerComp)
 {
 	if (!bInterrupted)
 	{
@@ -59,7 +58,7 @@ void UBTTask_AttackPlayer::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	}
 }
 
-void UBTTask_AttackPlayer::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+void UBTTask_UseAnimMontage::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
 {
 	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 
