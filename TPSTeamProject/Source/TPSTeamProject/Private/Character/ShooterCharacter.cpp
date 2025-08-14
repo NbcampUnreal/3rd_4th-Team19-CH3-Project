@@ -9,6 +9,7 @@
 #include "Util/Component/ObjectTweenComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KHY/Interactable/Interactable.h"
+#include "Taeyeon/ItemComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -441,7 +442,8 @@ void AShooterCharacter::Interaction()
 				if (HitComponent && HitComponent->ComponentTags.Contains(TEXT("Interaction")))
 				{
 					AActor* HitActor = Hit.GetActor();
-					IInteractable* InteractableActor = Cast<IInteractable>(HitActor);
+					UItemComponent* ItemComponent = HitActor->FindComponentByClass<UItemComponent>();
+					IInteractable* InteractableActor = Cast<IInteractable>(ItemComponent);
 
 					if (InteractableActor && HitActor)
 					{

@@ -20,18 +20,20 @@ void UItemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UItemComponent::Interact(ACharacter* PlayerCharacter)
+void UItemComponent::Interact(AActor* Interactor)
 {
 	check(!ItemName.IsNone());
 	
-	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(PlayerCharacter);
+	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(Interactor);
 	if (ShooterCharacter == nullptr) return;
 
 	UInventoryComponent* InventorySystem = ShooterCharacter->GetComponentByClass<UInventoryComponent>();
-	check(InventorySystem);
-	
-	InventorySystem->AddItem(ItemName, Amount);
-	
-	GetOwner()->Destroy();
+	if (InventorySystem == nullptr) return;
+
+	const bool bIsAddItemSuccess = InventorySystem->AddItem(ItemName, Amount);
+	if (bIsAddItemSuccess)
+	{
+		GetOwner()->Destroy();
+	}
 }
 

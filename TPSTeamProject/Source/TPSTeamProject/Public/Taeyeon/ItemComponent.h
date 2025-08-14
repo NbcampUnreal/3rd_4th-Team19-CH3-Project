@@ -1,13 +1,12 @@
 #pragma once
 
+#include "KHY/Interactable/Interactable.h"
 #include "CoreMinimal.h"
-#include "ItemInterface.h"
 #include "Components/ActorComponent.h"
-#include "GameData/ItemDataStruct.h"
 #include "ItemComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TPSTEAMPROJECT_API UItemComponent : public UActorComponent, public IItemInterface
+class TPSTEAMPROJECT_API UItemComponent : public UActorComponent, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -20,7 +19,7 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void Interact(ACharacter* PlayerCharacter) override;
+	virtual void Interact(AActor* Interactor) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
