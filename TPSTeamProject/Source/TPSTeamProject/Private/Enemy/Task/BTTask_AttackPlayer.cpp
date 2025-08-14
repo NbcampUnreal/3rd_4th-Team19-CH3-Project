@@ -51,7 +51,6 @@ void UBTTask_AttackPlayer::OnMontageEnded(UAnimMontage* Montage, bool bInterrupt
 {
 	if (!bInterrupted)
 	{
-		//비헤이비어 트리에 태스크 성공여부 알리기.
 		FinishLatentTask(*OwnerComp, EBTNodeResult::Succeeded);
 	}
 	else

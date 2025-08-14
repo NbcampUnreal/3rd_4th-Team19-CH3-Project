@@ -7,8 +7,6 @@ void UAnimNotify_SpitToPlayer::Notify(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 	if (Character)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Notify Called"));
 		Character->SpitAcid();
-		UE_LOG(LogTemp, Warning, TEXT("SpitAcid called and NEXT"));
 	}
 }

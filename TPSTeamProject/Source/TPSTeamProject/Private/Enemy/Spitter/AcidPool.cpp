@@ -42,10 +42,6 @@ void AAcidPool::BeginPlay()
 			DamageInterval = SpitterSkillData->PoolDamageInterval;
 			LifeDuration = SpitterSkillData->PoolLifeDuration;
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("SpitterSkillData is NULL!"));
-		}
 	}
 
 	GetWorldTimerManager().SetTimer(

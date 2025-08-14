@@ -12,11 +12,7 @@ ASpitterCharacter::ASpitterCharacter()
 
 void ASpitterCharacter::SpitAcid()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpitAcid called"));
-
 	if (!SpitProjectileClass) return;
-
-	UE_LOG(LogTemp, Warning, TEXT("SpitProjectileClass Exists"));
 
 	FVector SpawnLoc = GetActorLocation();
 	FRotator SpawnRot = GetActorRotation();

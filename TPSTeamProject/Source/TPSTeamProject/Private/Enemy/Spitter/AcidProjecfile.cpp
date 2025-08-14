@@ -27,8 +27,6 @@ AAcidProjecfile::AAcidProjecfile()
 
 void AAcidProjecfile::PostInitializeComponents()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AAcidProjecfile PostInitializeComponents Called"));
-
 	Super::PostInitializeComponents();
 
 	UWorld* World = GetWorld();
@@ -44,10 +42,6 @@ void AAcidProjecfile::PostInitializeComponents()
 			ProjectileMovementComponent->MaxSpeed = SpitterSkillData->ProjectileMaxSpeed;
 			ProjectileMovementComponent->ProjectileGravityScale = SpitterSkillData->ProjectileGravityScale;
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("SpitterSkillData is NULL!"));
-		}
 	}
 
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
@@ -60,7 +54,6 @@ void AAcidProjecfile::PostInitializeComponents()
 void AAcidProjecfile::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("AcidProjecfile spawned"));
 
 	if (GetInstigator())
 	{
@@ -71,7 +64,6 @@ void AAcidProjecfile::BeginPlay()
 void AAcidProjecfile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Projectile OnHit"));
 	if (!AcidPoolClass)
 	{
 		Destroy();
@@ -83,8 +75,6 @@ void AAcidProjecfile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 
 	if (APawn* HitPawn = Cast<APawn>(OtherActor))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Pawn Hit!"));
-
 		SpawnLoc = HitPawn->GetActorLocation() - 
 			FVector(0.0f, 0.0f, HitPawn->GetSimpleCollisionHalfHeight());
 

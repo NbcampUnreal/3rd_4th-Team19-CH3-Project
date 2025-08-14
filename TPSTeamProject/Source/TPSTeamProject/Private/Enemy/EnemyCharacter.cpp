@@ -16,6 +16,9 @@ AEnemyCharacter::AEnemyCharacter()
 	Movement->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 	Movement->AirControl = 0.2f;
 
+	BodyCollision = GetCapsuleComponent();
+	BodyCollision->SetGenerateOverlapEvents(false);
+
 	RightArmCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RightArmCollision"));
 	RightArmCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
 	RightArmCollision->SetGenerateOverlapEvents(false);
@@ -94,12 +97,21 @@ float AEnemyCharacter::TakeDamage(
 	return ActualDamage;
 }
 
-void AEnemyCharacter::SetMovementSpeed(float NewSpeed)
+void AEnemyCharacter::UpdateMovementSpeed()
 {
-	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
-	{
-		Movement->MaxWalkSpeed = NewSpeed;
-	}
+	AEnemyController* AIController = Cast<AEnemyController>(GetController());
+	if (!AIController) return;
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	if (!Movement) return;
+
+	bool bTaskRunning = AIController->GetBlackboardComponent()->GetValueAsBool(TEXT("TaskRunning"));
+	bool bCanSeeTarget = AIController->GetBlackboardComponent()->GetValueAsBool(TEXT("CanSeeTarget"));
+
+	if (bTaskRunning || bCanSeeTarget)
+		Movement->MaxWalkSpeed = RunSpeed;
+	else
+		Movement->MaxWalkSpeed = WalkSpeed;
 }
 
 void AEnemyCharacter::EnableRightArmCollision(bool bEnable)
@@ -171,5 +183,3 @@ void AEnemyCharacter::OnDeathAnimationFinished()
 {
 	Destroy();
 }
-
-

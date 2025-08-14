@@ -23,7 +23,6 @@ UBTTask_FindRandomLocation::UBTTask_FindRandomLocation()
 		}
 	}
 
-    // 이 키는 Vector(위치) 타입만 받겠다고 필터 설정
     LocationKey.AddVectorFilter(this, GET_MEMBER_NAME_CHECKED(UBTTask_FindRandomLocation, LocationKey));
 }
 
@@ -35,7 +34,6 @@ EBTNodeResult::Type UBTTask_FindRandomLocation::ExecuteTask(UBehaviorTreeCompone
     APawn* MyPawn = AIController->GetPawn();
     if (!MyPawn) return EBTNodeResult::Failed;
 
-    //내비시스템 바뀔 가능성 있음.
     UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld()); 
     if (!NavSystem) return EBTNodeResult::Failed;
 

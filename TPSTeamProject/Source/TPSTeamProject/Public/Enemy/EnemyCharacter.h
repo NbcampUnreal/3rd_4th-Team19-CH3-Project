@@ -19,17 +19,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	//타격영역 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UCapsuleComponent* BodyCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* RightArmCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* LeftArmCollision;
 
-	//데이터타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataType")
 	EEnemyType EnemyType;
 
-	//애니 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* DeathMontage;
 
@@ -63,7 +62,7 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	void SetMovementSpeed(float NewSpeed);
+	void UpdateMovementSpeed();
 
 	void EnableRightArmCollision(bool bEnable);
 	void EnableBothArmCollision(bool bEnable);
