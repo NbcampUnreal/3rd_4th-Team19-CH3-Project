@@ -16,8 +16,9 @@ public class TPSTeamProject : ModuleRules
 			"EnhancedInput",
 			"AIModule",
 			"NavigationSystem",
-			"GameplayTasks"
-		});
+			"GameplayTasks",
+            "UMG"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
