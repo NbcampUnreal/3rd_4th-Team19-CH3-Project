@@ -2,17 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Stat/Statable.h"
 #include "GunActor.generated.h"
 
 class USkeletalMeshComponent;
 class UCameraComponent;
 class UPointLightComponent;
 class UObjectTweenComponent;
+class UEquipmentParts;
+class UGunStatCalculater;
 enum class EAttachmentSlot : uint8;
 
 UCLASS()
-class TPSTEAMPROJECT_API AGunActor : public AActor, public IStatable
+class TPSTEAMPROJECT_API AGunActor : public AActor
 {
 	GENERATED_BODY()
 	
@@ -23,24 +24,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-
 	UFUNCTION(BlueprintCallable)
 	void Fire();
-
-	virtual void UpdateStats() override;
 
 	FORCEINLINE UCameraComponent* GetScopeCameraComp() const;
 
 	FORCEINLINE ACameraActor* GetSightCameraComp() const;
 	
-	// 부착물을 Slot에 따른 지정된 Index로 교체하는 함수
-	UFUNCTION(BlueprintCallable, Category = "Attachment Customization")
-	void SetAttachmentByIndex(EAttachmentSlot Slot, int32 Index);
+	UFUNCTION(BlueprintCallable)
+	void ChangeParts(int32 Index, EAttachmentSlot InType);
 
 protected:
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun")
-	TObjectPtr<USceneComponent> RootComp;*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
 	TObjectPtr<USkeletalMeshComponent> GripBaseComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
@@ -86,6 +80,8 @@ protected:
 	TObjectPtr<class UParticleSystemComponent> MuzzleParticleComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ScopeTexture")
 	TObjectPtr<class UTexture> CamoTexture;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
+	TObjectPtr<USoundBase> FireBulletSound;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();
@@ -98,16 +94,14 @@ protected:
 
 private:
 	UPROPERTY()
-	TSet<TObjectPtr<class UStatsComponent>> StatComponents;
-	UPROPERTY()
-	TObjectPtr<class UStatContainerCollection> StatCollection;
+	TObjectPtr<class UGunStatCalculater> StatCalculater;
 
 	UPROPERTY()
 	FHitResult HitResult;
 	UPROPERTY()
 	TObjectPtr<APlayerCameraManager> CameraManager;
-
-	TMap<EAttachmentSlot, TObjectPtr<USkeletalMeshComponent>> AttachmentCompMap;
+	UPROPERTY()
+	TMap<EAttachmentSlot, TObjectPtr<UEquipmentParts>> EquipPartsMap;
 
 	UFUNCTION()
 	void OnFireLight();
@@ -117,9 +111,10 @@ private:
 	void OnMuzzleParticle();
 	UFUNCTION()
 	void OffMuzzleParticle();
-
-	// 부착물 skeletal mesh 비동기로딩 함수
-	void LoadAndSetAttachmentMesh(EAttachmentSlot Slot, int32 Index);
+	UFUNCTION()
+	void InitializeAttachment();
+	UFUNCTION()
+	void PlayFireSound();
 
 	FCollisionQueryParams Params;
 };
