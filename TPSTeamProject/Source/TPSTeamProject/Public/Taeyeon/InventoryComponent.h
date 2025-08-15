@@ -46,6 +46,9 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	const TArray<FInventorySlot>& GetInventory() const { return Inventory; }
+
+	UFUNCTION(BlueprintPure)
+	const UDataTable* GetItemDataTable() const { return ItemDataTable.Get(); }
 	
 protected:
 	virtual void BeginPlay() override;
