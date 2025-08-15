@@ -45,6 +45,8 @@ public:
 	UPROPERTY()
 	bool bHasGivenDamage = false;
 
+	float BaseDamage;
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -55,12 +57,15 @@ public:
 	//virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
 
 	UFUNCTION()
-	void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
+	virtual void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
+
+	void ResetDamage();
+	void MultiplyDamage(float Multiplier);
 
 	void UpdateMovementSpeed();
 

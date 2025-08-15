@@ -51,6 +51,8 @@ void AEnemyCharacter::BeginPlay()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = WalkSpeed;
 
+	BaseDamage = Damage;
+
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
 	{
@@ -65,8 +67,7 @@ float AEnemyCharacter::TakeDamage(
 	float DamageAmount,
 	struct FDamageEvent const& DamageEvent,
 	AController* EventInstigator,
-	AActor* DamageCauser
-)
+	AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
@@ -95,6 +96,16 @@ float AEnemyCharacter::TakeDamage(
 	}
 
 	return ActualDamage;
+}
+
+void AEnemyCharacter::ResetDamage()
+{
+	Damage = BaseDamage;
+}
+
+void AEnemyCharacter::MultiplyDamage(float Multiplier)
+{
+	Damage = BaseDamage * Multiplier;
 }
 
 void AEnemyCharacter::UpdateMovementSpeed()
