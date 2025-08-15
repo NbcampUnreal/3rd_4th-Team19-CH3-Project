@@ -82,6 +82,8 @@ protected:
 	TObjectPtr<class UTexture> CamoTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
 	TObjectPtr<USoundBase> FireBulletSound;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shoot")
+	bool IsFire;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();
@@ -115,6 +117,8 @@ private:
 	void InitializeAttachment();
 	UFUNCTION()
 	void PlayFireSound();
+	UFUNCTION()
+	void UpdateShooterStat();
 
 	FCollisionQueryParams Params;
 };

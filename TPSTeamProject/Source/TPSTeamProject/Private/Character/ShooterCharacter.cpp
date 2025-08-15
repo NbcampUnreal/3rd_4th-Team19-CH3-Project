@@ -46,6 +46,20 @@ void AShooterCharacter::BeginPlay()
 		}
 
 		GunActor->Fire();
+
+		double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+		double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
+
+		AddControllerYawInput(RecoilYaw);
+		AddControllerPitchInput(RecoilPitch);
+
+		if (FireMontage)
+		{
+			if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+			{
+				AnimInstance->Montage_Play(FireMontage);
+			}
+		}
 	});
 
 	CloseContactDelegate.BindLambda([this]()
@@ -243,6 +257,20 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 			bIsShoot = true;
 
 			GunActor->Fire();
+
+			double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+			double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
+
+			AddControllerYawInput(RecoilYaw);
+			AddControllerPitchInput(RecoilPitch);
+
+			if (FireMontage)
+			{
+				if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+				{
+					AnimInstance->Montage_Play(FireMontage);
+				}
+			}
 		}
 
 		return;

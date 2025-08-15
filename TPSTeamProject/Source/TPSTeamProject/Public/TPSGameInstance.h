@@ -8,6 +8,7 @@ UENUM(BlueprintType)
 enum class ESubsystemType : uint8
 {
 	DataTable,
+	Observer,
 };
 
 UCLASS()
