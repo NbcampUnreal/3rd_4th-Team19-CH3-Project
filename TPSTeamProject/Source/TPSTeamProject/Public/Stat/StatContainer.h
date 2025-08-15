@@ -53,6 +53,11 @@ public:
 		return Stats[InType];
 	}
 
+	FORCEINLINE void EmptyStatValue()
+	{
+		Stats.Empty();
+	}
+
 	virtual bool operator==(const FStatContainer& InContainer)
 	{
 		return UUID == InContainer.UUID;
