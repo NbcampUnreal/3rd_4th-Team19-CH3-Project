@@ -18,6 +18,11 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Weapon/WeaponTypes.h"
 #include "Stat/GunStatCalculater.h"
+#include "Character/ShooterCharacter.h"
+#include "Equipment/EquipType.h"
+#include "State/ShooterState.h"
+#include "Manager/GameInstanceSubsystem/ObserverManager.h"
+#include "Manager/ObserverManager/MessageType.h"
 
 AGunActor::AGunActor()
 {
@@ -78,6 +83,10 @@ void AGunActor::BeginPlay()
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
 		CameraManager = PlayerController->PlayerCameraManager;
+		if (AShooterState* ShooterState = PlayerController->GetPlayerState<AShooterState>())
+		{
+			ShooterState->AddStatCalculater(StatCalculater);
+		}
 	}
 
 	if (IsValid(ShootFireTweenComp))
@@ -96,24 +105,43 @@ void AGunActor::Fire()
 		return;
 	}
 
-	const FVector& FireStartPointLocation = CameraManager->GetCameraLocation();
-	const FVector& FireEndPointLocation = FireStartPointLocation * FireRange;
+	AActor* CurrentCameraActor = CameraManager->GetViewTarget();
+	UCameraComponent* CurrentCameraComp = CurrentCameraActor->FindComponentByClass<UCameraComponent>();
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		FireStartPointLocation,
-		FireEndPointLocation,
-		ECollisionChannel::ECC_Visibility,
-		Params
-	);
+	const FVector& FireStartPointLocation = CurrentCameraComp->GetComponentLocation();
+	const FRotator& CurrentCameraRotater = CurrentCameraComp->GetComponentRotation();
+	const FVector& FireEndPointLocation = FireStartPointLocation + CurrentCameraRotater.Quaternion().GetForwardVector() * FireRange;
 
-	DrawDebugLine(GetWorld(), FireStartPointLocation, FireEndPointLocation, FColor::Red);
+	bool bHit = false;
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+	{
+		int32 ViewportSizeX, ViewportSizeY;
+		PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+
+		FVector2D ScreenCenter = FVector2D(ViewportSizeX / 2, ViewportSizeY / 2);
+
+		FVector StartLocation;
+		FVector Direction;
+		PlayerController->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, StartLocation, Direction);
+
+		FVector EndLocation = StartLocation + Direction * 5000.f;
+
+		bHit = GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			StartLocation,
+			EndLocation,
+			ECollisionChannel::ECC_Visibility,
+			Params
+		);
+
+		DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
+	}
 
 	if (bHit)
 	{
 		AActor* HitActor = HitResult.GetActor();
 
-		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %d"), *HitActor->GetFName().ToString(), StatCalculater->GetAtkDamage());
+		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %d"), *HitActor->GetName(), StatCalculater->GetAtkDamage());
 	}
 
 	ShootFireTweenComp->PlayFromStart();
@@ -198,6 +226,13 @@ void AGunActor::InitializeAttachment()
 	CombineMeshDelegate.Execute(MagComp, 1, EAttachmentSlot::Mag, FName(TEXT("MagParts")));
 
 	StatCalculater->UpdateStat();
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		ObserverManager->SendEvent(EMessageType::UpdateStat, -1);
+	}
 }
 
 void AGunActor::SetMeshToScope()
@@ -268,5 +303,10 @@ void AGunActor::PlayFireSound()
 			FirePoint->GetComponentLocation()
 		);
 	}
+}
+
+void AGunActor::UpdateShooterStat()
+{
+	
 }
 

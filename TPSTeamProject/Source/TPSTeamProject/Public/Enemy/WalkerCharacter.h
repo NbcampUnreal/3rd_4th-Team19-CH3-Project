@@ -2,12 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Enemy/EnemyCharacter.h"
-//#include "GenericTeamAgentInterface.h"  //팀 ID 설정
-#include "Components/CapsuleComponent.h"
 #include "WalkerCharacter.generated.h"
 
 UCLASS()
-class TPSTEAMPROJECT_API AWalkerCharacter : public AEnemyCharacter //,public IGenericTeamAgentInterface
+class TPSTEAMPROJECT_API AWalkerCharacter : public AEnemyCharacter
 {
 	GENERATED_BODY()
 

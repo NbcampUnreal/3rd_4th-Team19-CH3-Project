@@ -60,15 +60,6 @@ void AEnemyController::OnPossess(APawn* InPawn)
 
 		if (WalkerData)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("WalkerData Values:"));
-			UE_LOG(LogTemp, Warning, TEXT("  SightRadius: %f"), WalkerData->SightRadius);
-			UE_LOG(LogTemp, Warning, TEXT("  LoseSightRadius: %f"), WalkerData->LoseSightRadius);
-			UE_LOG(LogTemp, Warning, TEXT("  PeripheralVisionAngleDegrees: %f"), WalkerData->PeripheralVisionAngleDegress);
-			UE_LOG(LogTemp, Warning, TEXT("  SightMaxAge: %f"), WalkerData->SightMaxAge);
-			UE_LOG(LogTemp, Warning, TEXT("  HearingRange: %f"), WalkerData->HearingRange);
-			UE_LOG(LogTemp, Warning, TEXT("  LoSHearingRange: %f"), WalkerData->LoSHearingRange);
-			UE_LOG(LogTemp, Warning, TEXT("  HearingMaxAge: %f"), WalkerData->HearingMaxAge);
-
 			SightConfig->SightRadius = WalkerData->SightRadius;
 			SightConfig->LoseSightRadius = WalkerData->LoseSightRadius;
 			SightConfig->PeripheralVisionAngleDegrees = WalkerData->PeripheralVisionAngleDegress;
@@ -85,17 +76,6 @@ void AEnemyController::OnPossess(APawn* InPawn)
 			HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
 			HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;  //팀 ID 설정후 삭제
 			HearingConfig->DetectionByAffiliation.bDetectFriendlies = true; //팀 ID 설정 후 삭제
-
-			UE_LOG(LogTemp, Warning, TEXT("SightConfig Values:"));
-			UE_LOG(LogTemp, Warning, TEXT("  SightRadius: %f"), SightConfig->SightRadius);
-			UE_LOG(LogTemp, Warning, TEXT("  LoseSightRadius: %f"), SightConfig->LoseSightRadius);
-			UE_LOG(LogTemp, Warning, TEXT("  PeripheralVisionAngleDegrees: %f"), SightConfig->PeripheralVisionAngleDegrees);
-			UE_LOG(LogTemp, Warning, TEXT("  SightMaxAge: %f"), SightConfig->GetMaxAge());
-
-			UE_LOG(LogTemp, Warning, TEXT("HearingConfig Values:"));
-			UE_LOG(LogTemp, Warning, TEXT("  HearingRange: %f"), HearingConfig->HearingRange);
-			UE_LOG(LogTemp, Warning, TEXT("  LoSHearingRange: %f"), HearingConfig->LoSHearingRange);
-			UE_LOG(LogTemp, Warning, TEXT("  HearingMaxAge: %f"), HearingConfig->GetMaxAge());
 
 			AIPerception->ConfigureSense(*SightConfig);
 			AIPerception->ConfigureSense(*HearingConfig);
@@ -150,20 +130,20 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			{
 				BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), true);
-				if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
-				{
-					AICharacter->SetMovementSpeed(AICharacter->RunSpeed);
-				}
+				//if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
+				//{
+				//	AICharacter->SetMovementSpeed(AICharacter->RunSpeed);
+				//}
 				UE_LOG(LogTemp, Warning, TEXT("Sight Succeed"));
 
 			}
 			else
 			{
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), false);
-				if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
-				{
-					AICharacter->SetMovementSpeed(AICharacter->WalkSpeed);
-				}
+				//if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
+				//{
+				//	AICharacter->SetMovementSpeed(AICharacter->WalkSpeed);
+				//}
 			}
 		}
 	}
@@ -176,5 +156,10 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			BlackboardComp->SetValueAsBool(TEXT("HeardNoise"), true);
 			UE_LOG(LogTemp, Warning, TEXT("HeardNoise Succeed"));
 		}
+	}
+
+	if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
+	{
+		AICharacter->UpdateMovementSpeed();
 	}
 }

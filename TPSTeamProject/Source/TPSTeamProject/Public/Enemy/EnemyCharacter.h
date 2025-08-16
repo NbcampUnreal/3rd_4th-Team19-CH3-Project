@@ -19,17 +19,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	//타격영역 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UCapsuleComponent* BodyCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* RightArmCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* LeftArmCollision;
 
-	//데이터타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataType")
 	EEnemyType EnemyType;
 
-	//애니 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* DeathMontage;
 
@@ -46,6 +45,8 @@ public:
 	UPROPERTY()
 	bool bHasGivenDamage = false;
 
+	float BaseDamage;
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
@@ -56,14 +57,17 @@ public:
 	//virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
 
 	UFUNCTION()
-	void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
+	virtual void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	void SetMovementSpeed(float NewSpeed);
+	void ResetDamage();
+	void MultiplyDamage(float Multiplier);
+
+	void UpdateMovementSpeed();
 
 	void EnableRightArmCollision(bool bEnable);
 	void EnableBothArmCollision(bool bEnable);
