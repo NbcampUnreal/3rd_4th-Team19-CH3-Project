@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-//#include "GenericTeamAgentInterface.h"  //팀 ID 설정
+#include "GenericTeamAgentInterface.h"  //팀 ID 설정
 #include "Components/CapsuleComponent.h"
 #include "GameData/EnemyStatDataStruct.h"
 #include "EnemyCharacter.generated.h"
 
 UCLASS()
-class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter //,public IGenericTeamAgentInterface
+class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter ,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -53,8 +53,8 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	//virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; } //팀 ID
-	//virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; } //팀 ID
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
 
 	UFUNCTION()
 	virtual void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -76,7 +76,7 @@ public:
 	void OnDeathAnimationFinished();
 
 private:
-	//FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
+	FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
 	FTimerHandle DeathTimerHandle;
 
 };

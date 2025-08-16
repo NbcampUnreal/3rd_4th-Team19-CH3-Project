@@ -48,11 +48,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	bool bIsCloseContact;
 
+	float Health = 100.0f;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
+
+	void OnDeath();
 
 private:
 
