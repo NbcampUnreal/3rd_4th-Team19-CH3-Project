@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+struct FInputActionValue;
+class UInventoryWidget;
 class UInventoryComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -32,8 +34,6 @@ public:
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timeline")
 	TObjectPtr<UCurveFloat> ZoomCurveFloat;*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	TObjectPtr<UInventoryComponent> InventorySystem;
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,6 +49,13 @@ protected:
 	bool bIsZoom;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	bool bIsCloseContact;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
+	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TObjectPtr<UInventoryWidget> InventoryWidget;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComp;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -86,6 +93,10 @@ private:
 	void ZoomTimelineFinished();
 	UFUNCTION()
 	void Interaction();
+	UFUNCTION()
+	void ToggleInventory();
+	UFUNCTION()
+	void OnInventoryUpdated();
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;

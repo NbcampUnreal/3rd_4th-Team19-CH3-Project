@@ -17,7 +17,7 @@ public:
 	void RefreshInventory(UInventoryComponent* InventoryComp);
 
 protected:
-	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UWrapBox> WrapBox;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "InventoryUI")

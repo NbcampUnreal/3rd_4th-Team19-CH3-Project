@@ -38,7 +38,7 @@ bool UInventoryComponent::AddItem(FName ItemName, int32 Amount)
 				const int32 RealAddAmount = FMath::Min(AddAmount, AmountLeft);
 
 				Slot.Amount += RealAddAmount;
-				Amount -= RealAddAmount;
+				AddAmount -= RealAddAmount;
 
 				if (AddAmount <= 0) break;
 			}
@@ -62,10 +62,10 @@ bool UInventoryComponent::AddItem(FName ItemName, int32 Amount)
 		}
 	}
 
-	// if (AddAmount < Amount)
-	// {
-	// 	OnInventoryUpdated.Broadcast();
-	// }
+	if (AddAmount < Amount)
+	{
+		OnInventoryUpdated.Broadcast();
+	}
 
 	return AddAmount == 0;
 }

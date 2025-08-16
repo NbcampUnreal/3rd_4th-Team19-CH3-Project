@@ -9,6 +9,7 @@
 #include "Util/Component/ObjectTweenComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KHY/Interactable/Interactable.h"
+#include "Taeyeon/InventoryWidget.h"
 #include "Taeyeon/ItemComponent.h"
 
 AShooterCharacter::AShooterCharacter()
@@ -25,7 +26,7 @@ AShooterCharacter::AShooterCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	ZoomTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ZoomTween"));
-	InventorySystem = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 
 	bIsZoom = false;
 	bIsAuto = false;
@@ -35,7 +36,7 @@ AShooterCharacter::AShooterCharacter()
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	GunActor = GetWorld()->SpawnActor<AGunActor>(GunClass);
 	GetMesh()->HideBoneByName(TEXT("Weapon"), EPhysBodyOp::PBO_None);
 	GunActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon"));
@@ -77,6 +78,39 @@ void AShooterCharacter::BeginPlay()
 		ZoomTimeline->AddInterpFloat(ZoomCurveFloat, TimelineProgress);
 		ZoomTimeline->SetTimelineFinishedFunc(TimelineFinished);
 	}*/
+
+	InventoryComp->OnInventoryUpdated.AddDynamic(this, &AShooterCharacter::OnInventoryUpdated);
+}
+
+void AShooterCharacter::ToggleInventory()
+{
+	check(InventoryWidgetClass);
+
+	// if (!InventoryWidget)
+	// {
+	// 	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
+	// }
+
+	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
+	check(PlayerController)
+	{
+		if (InventoryWidget->IsInViewport())
+		{
+			InventoryWidget->RemoveFromParent();
+			FInputModeGameOnly GameOnlyInputMode;
+			PlayerController->SetInputMode(GameOnlyInputMode);
+			PlayerController->SetShowMouseCursor(false);
+		}
+		else
+		{
+			InventoryWidget->RefreshInventory(InventoryComp);
+			InventoryWidget->AddToViewport();
+			FInputModeUIOnly UIOnlyInputMode;
+			UIOnlyInputMode.SetWidgetToFocus(InventoryWidget->TakeWidget());
+			PlayerController->SetInputMode(UIOnlyInputMode);
+			PlayerController->SetShowMouseCursor(true);
+		}
+	}
 }
 
 // Called every frame
@@ -182,6 +216,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					ETriggerEvent::Triggered,
 					this,
 					&AShooterCharacter::Interaction
+				);
+			}
+
+			ensure(PlayerController->InventoryToggleAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->InventoryToggleAction,
+					ETriggerEvent::Triggered,
+					this,
+					&AShooterCharacter::ToggleInventory
 				);
 			}
 		}
@@ -426,7 +470,7 @@ void AShooterCharacter::Interaction()
 		200.f,
 		UEngineTypes::ConvertToTraceType(ECC_Visibility),
 		false,
-		{ this },
+		{this},
 		EDrawDebugTrace::ForDuration,
 		OutHits,
 		true
@@ -457,3 +501,10 @@ void AShooterCharacter::Interaction()
 	}
 }
 
+void AShooterCharacter::OnInventoryUpdated()
+{
+	if (InventoryWidget && InventoryWidget->IsInViewport())
+	{
+		InventoryWidget->RefreshInventory(InventoryComp);
+	}
+}
