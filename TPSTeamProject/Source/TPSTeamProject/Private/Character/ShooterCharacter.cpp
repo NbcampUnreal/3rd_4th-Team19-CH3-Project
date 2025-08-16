@@ -80,16 +80,12 @@ void AShooterCharacter::BeginPlay()
 	}*/
 
 	InventoryComp->OnInventoryUpdated.AddDynamic(this, &AShooterCharacter::OnInventoryUpdated);
+	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
 }
 
 void AShooterCharacter::ToggleInventory()
 {
 	check(InventoryWidgetClass);
-
-	// if (!InventoryWidget)
-	// {
-	// 	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
-	// }
 
 	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
 	check(PlayerController)
@@ -97,18 +93,18 @@ void AShooterCharacter::ToggleInventory()
 		if (InventoryWidget->IsInViewport())
 		{
 			InventoryWidget->RemoveFromParent();
-			FInputModeGameOnly GameOnlyInputMode;
-			PlayerController->SetInputMode(GameOnlyInputMode);
+			//FInputModeGameOnly GameOnlyInputMode;
+			//PlayerController->SetInputMode(GameOnlyInputMode);
 			PlayerController->SetShowMouseCursor(false);
 		}
 		else
 		{
-			InventoryWidget->RefreshInventory(InventoryComp);
 			InventoryWidget->AddToViewport();
-			FInputModeUIOnly UIOnlyInputMode;
-			UIOnlyInputMode.SetWidgetToFocus(InventoryWidget->TakeWidget());
-			PlayerController->SetInputMode(UIOnlyInputMode);
+			//FInputModeUIOnly UIOnlyInputMode;
+			//UIOnlyInputMode.SetWidgetToFocus(InventoryWidget->TakeWidget());
+			//PlayerController->SetInputMode(UIOnlyInputMode);
 			PlayerController->SetShowMouseCursor(true);
+			InventoryWidget->RefreshInventory(InventoryComp);
 		}
 	}
 }
@@ -223,7 +219,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			{
 				EnhancedInput->BindAction(
 					PlayerController->InventoryToggleAction,
-					ETriggerEvent::Triggered,
+					ETriggerEvent::Completed,
 					this,
 					&AShooterCharacter::ToggleInventory
 				);

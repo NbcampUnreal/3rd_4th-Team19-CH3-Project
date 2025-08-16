@@ -8,7 +8,7 @@ class UInventorySlotWidget;
 class UWrapBox;
 class UInventoryComponent;
 
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class TPSTEAMPROJECT_API UInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
