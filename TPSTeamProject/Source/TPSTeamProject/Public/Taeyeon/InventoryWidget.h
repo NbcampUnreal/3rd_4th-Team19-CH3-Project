@@ -16,6 +16,8 @@ class TPSTEAMPROJECT_API UInventoryWidget : public UUserWidget
 public:
 	void RefreshInventory(UInventoryComponent* InventoryComp);
 
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	TObjectPtr<UWrapBox> WrapBox;

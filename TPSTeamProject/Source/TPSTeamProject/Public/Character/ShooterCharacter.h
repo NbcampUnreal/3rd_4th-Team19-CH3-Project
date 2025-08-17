@@ -62,6 +62,8 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+	void ToggleInventory();
 
 private:
 
@@ -93,8 +95,6 @@ private:
 	void ZoomTimelineFinished();
 	UFUNCTION()
 	void Interaction();
-	UFUNCTION()
-	void ToggleInventory();
 	UFUNCTION()
 	void OnInventoryUpdated();
 

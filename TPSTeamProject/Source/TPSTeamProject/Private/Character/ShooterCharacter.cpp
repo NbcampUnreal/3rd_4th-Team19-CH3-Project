@@ -93,17 +93,15 @@ void AShooterCharacter::ToggleInventory()
 		if (InventoryWidget->IsInViewport())
 		{
 			InventoryWidget->RemoveFromParent();
-			//FInputModeGameOnly GameOnlyInputMode;
-			//PlayerController->SetInputMode(GameOnlyInputMode);
+			PlayerController->SetInputMode(FInputModeGameOnly());
 			PlayerController->SetShowMouseCursor(false);
 		}
 		else
 		{
 			InventoryWidget->AddToViewport();
-			//FInputModeUIOnly UIOnlyInputMode;
-			//UIOnlyInputMode.SetWidgetToFocus(InventoryWidget->TakeWidget());
-			//PlayerController->SetInputMode(UIOnlyInputMode);
+			PlayerController->SetInputMode(FInputModeUIOnly().SetWidgetToFocus(InventoryWidget->TakeWidget()));
 			PlayerController->SetShowMouseCursor(true);
+			InventoryWidget->SetKeyboardFocus();
 			InventoryWidget->RefreshInventory(InventoryComp);
 		}
 	}
