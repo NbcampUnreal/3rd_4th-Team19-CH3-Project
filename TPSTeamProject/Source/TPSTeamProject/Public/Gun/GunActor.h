@@ -121,4 +121,5 @@ private:
 	void UpdateShooterStat();
 
 	FCollisionQueryParams Params;
+	const FName HitBone_Head = FName("head");
 };

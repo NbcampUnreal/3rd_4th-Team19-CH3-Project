@@ -148,16 +148,15 @@ void AGunActor::Fire()
 		{
 			float Damage = StatCalculater->GetAtkDamage();
 
-			UPhysicalMaterial* PhysMat = HitResult.PhysMaterial.Get();
-			if (PhysMat)
+			FName HitBoneName = HitResult.BoneName;
+			UE_LOG(LogTemp, Warning, TEXT("Hit BoneName: %s"), *HitBoneName.ToString());
+			if (HitBoneName == HitBone_Head)
 			{
-				EPhysicalSurface Surface = PhysMat->SurfaceType;
-				switch (Surface)
-				{
-				case SurfaceType1: Damage *= 2.0f; break;
-				case SurfaceType2: Damage *= 1.0f; break;
-				default: Damage *= 0.5f; break;
-				}
+				Damage *= 1.5f;
+			}
+			else
+			{
+				Damage *= 1.0f;
 			}
 
 			UGameplayStatics::ApplyPointDamage(

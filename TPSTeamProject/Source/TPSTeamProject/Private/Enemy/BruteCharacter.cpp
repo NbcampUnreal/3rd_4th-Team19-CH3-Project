@@ -42,16 +42,9 @@ void ABruteCharacter::OnCapsuleOverlap(UPrimitiveComponent* OverlappedComponent,
 	TArray<AActor*> OverlappingActors;
 	OverlappedComponent->GetOverlappingActors(OverlappingActors);
 
-	UE_LOG(LogTemp, Warning, TEXT("=== Overlapping Actors (%d) ==="), OverlappingActors.Num());
-
 	for (AActor* Actor : OverlappingActors)
 	{
 		if (!Actor || Actor == this) continue;
-
-		UE_LOG(LogTemp, Warning, TEXT("Actor Name: %s, Class: %s"),
-			*Actor->GetName(),
-			*Actor->GetClass()->GetName()
-		);
 
 		APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 		if (Actor == PlayerPawn)
@@ -70,8 +63,6 @@ void ABruteCharacter::OnCapsuleOverlap(UPrimitiveComponent* OverlappedComponent,
 		ACharacter* OtherChar = Cast<ACharacter>(Actor);
 		if (OtherChar)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Character IS"));
-
 			UCharacterMovementComponent* OtherCharMovement = OtherChar->FindComponentByClass<UCharacterMovementComponent>();
 			if (OtherCharMovement)
 			{
