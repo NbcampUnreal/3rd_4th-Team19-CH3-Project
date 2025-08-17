@@ -7,6 +7,8 @@
 #include "GameData/EnemyStatDataStruct.h"
 #include "EnemyCharacter.generated.h"
 
+class AItem;
+
 UCLASS()
 class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter ,public IGenericTeamAgentInterface
 {
@@ -19,6 +21,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	TSubclassOf<AItem> DropCoin;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* BodyCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
@@ -74,6 +79,8 @@ public:
 
 	void OnDeath();
 	void OnDeathAnimationFinished();
+
+	void DropItems();
 
 private:
 	FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID

@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TPSGameInstance.h"
 #include "Manager/GameInstanceSubsystem/DataTableManager.h"
+#include "Taeyeon/Item.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -175,6 +176,8 @@ void AEnemyCharacter::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	DropItems();
+	
 	if (DeathMontage && GetMesh())
 	{
 		float Duration = PlayAnimMontage(DeathMontage);
@@ -201,4 +204,22 @@ void AEnemyCharacter::OnDeath()
 void AEnemyCharacter::OnDeathAnimationFinished()
 {
 	Destroy();
+}
+
+void AEnemyCharacter::DropItems()
+{
+	if (EnemyType == EEnemyType::Walker || (DropCoin == nullptr))
+	{
+		return;
+	}
+
+	const FVector SpawnLocation = GetActorLocation();
+	const FRotator SpawnRotation = GetActorRotation();
+	
+	if (DropCoin)
+	{
+		GetWorld()->SpawnActor<AItem>(DropCoin,
+			FVector(SpawnLocation.X, SpawnLocation.Y,(SpawnLocation.Z - 90.f)),
+			SpawnRotation);
+	}
 }
