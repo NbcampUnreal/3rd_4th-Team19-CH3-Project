@@ -195,6 +195,11 @@ void AGunActor::ChangeParts(int32 Index, EAttachmentSlot InType)
 	StatCalculater->UpdateStat();
 }
 
+UStatCalculater* AGunActor::GetStatCalculater() const
+{
+	return StatCalculater;
+}
+
 void AGunActor::OnFireLight()
 {
 	MuzzleLight->SetVisibility(true);

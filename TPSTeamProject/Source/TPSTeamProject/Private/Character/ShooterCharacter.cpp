@@ -54,6 +54,8 @@ void AShooterCharacter::BeginPlay()
 		ObserverManager->Subscribe(this);
 	}
 
+	StatCalculaters.Add(GunActor->GetStatCalculater());
+
 	ShootDelegate.BindLambda([this]()
 	{
 		if (IsValid(GunActor) == false)
