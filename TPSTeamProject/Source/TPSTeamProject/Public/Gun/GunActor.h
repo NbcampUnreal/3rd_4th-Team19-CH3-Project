@@ -87,6 +87,10 @@ protected:
 	TObjectPtr<USoundBase> FireBulletSound;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shoot")
 	bool IsFire;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UMaterialInterface> EnemyHitParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UMaterialInterface> NonEnemyHitParticle;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();

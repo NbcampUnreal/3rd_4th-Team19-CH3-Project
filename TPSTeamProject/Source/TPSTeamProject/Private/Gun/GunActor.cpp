@@ -135,9 +135,11 @@ void AGunActor::Fire()
 			Params
 		);
 
-		DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
+		//DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
 	}
 
+	UMaterialInterface* BulletDecal = nullptr;
+	float DecalLifeSpan = 0.f;
 	if (bHit)
 	{
 		AActor* HitActor = HitResult.GetActor();
@@ -167,6 +169,27 @@ void AGunActor::Fire()
 				GetOwner()->GetInstigatorController(),
 				this,
 				nullptr
+			);
+
+			BulletDecal = EnemyHitParticle;
+			DecalLifeSpan = 0.5f;
+		}
+		else
+		{
+			BulletDecal = NonEnemyHitParticle;
+			DecalLifeSpan = 5.f;
+		}
+
+		if (BulletDecal)
+		{
+			FRotator DecalRotation = (-HitResult.ImpactNormal).Rotation();
+			UGameplayStatics::SpawnDecalAtLocation(
+				this,
+				BulletDecal,
+				FVector(16.f, 16.f, 16.f),
+				HitResult.Location,
+				DecalRotation,
+				DecalLifeSpan
 			);
 		}
 	}
