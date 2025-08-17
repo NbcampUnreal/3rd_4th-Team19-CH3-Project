@@ -28,6 +28,10 @@ void UInventorySlotWidget::UpdateSlot(const FInventorySlot& SlotData, const UDat
 				ItemStackText->SetText(FText::AsNumber(SlotData.Amount));
 				ItemStackBox->SetVisibility(ESlateVisibility::Visible);
 			}
+			else
+			{
+				ItemStackBox->SetVisibility(ESlateVisibility::Hidden);
+			}
 		}
 	}
 }
