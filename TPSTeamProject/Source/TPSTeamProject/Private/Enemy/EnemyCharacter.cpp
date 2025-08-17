@@ -72,7 +72,7 @@ float AEnemyCharacter::TakeDamage(
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	Health -= ActualDamage;
-	UE_LOG(LogTemp, Warning, TEXT("Player took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+	UE_LOG(LogTemp, Warning, TEXT("[Enemy] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
 
 	if (Health <= 0.0f)
 	{
@@ -90,7 +90,7 @@ float AEnemyCharacter::TakeDamage(
 			{
 				FVector HitLocation = InstigatorPawn->GetActorLocation();
 				AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("WasDamaged"), true);
-				AIController->GetBlackboardComponent()->SetValueAsVector(TEXT("DamagedLocation"), HitLocation);
+				AIController->GetBlackboardComponent()->SetValueAsVector(TEXT("HitLocation"), HitLocation);
 			}
 		}
 	}
@@ -165,7 +165,9 @@ void AEnemyCharacter::OnDeath()
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("IsDead?"));
 		AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"), true);
+		AIController->BrainComponent->StopLogic("Dead");
 		AIController->UnPossess();
 	}
 
@@ -176,14 +178,20 @@ void AEnemyCharacter::OnDeath()
 	if (DeathMontage && GetMesh())
 	{
 		float Duration = PlayAnimMontage(DeathMontage);
-
-		GetWorldTimerManager().SetTimer(
-			DeathTimerHandle,
-			this,
-			&AEnemyCharacter::OnDeathAnimationFinished,
-			Duration,
-			false
-		);
+		if (Duration > 0.0f)
+		{
+			GetWorldTimerManager().SetTimer(
+				DeathTimerHandle,
+				this,
+				&AEnemyCharacter::OnDeathAnimationFinished,
+				Duration,
+				false
+			);
+		}
+		else
+		{
+			Destroy();
+		}
 	}
 	else
 	{

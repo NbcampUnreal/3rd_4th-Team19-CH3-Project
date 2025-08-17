@@ -23,6 +23,7 @@
 #include "State/ShooterState.h"
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
+#include "Perception/AISense_Hearing.h"
 
 AGunActor::AGunActor()
 {
@@ -142,6 +143,33 @@ void AGunActor::Fire()
 		AActor* HitActor = HitResult.GetActor();
 
 		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %d"), *HitActor->GetName(), StatCalculater->GetAtkDamage());
+
+		if (HitActor->IsA<APawn>())
+		{
+			float Damage = StatCalculater->GetAtkDamage();
+
+			UPhysicalMaterial* PhysMat = HitResult.PhysMaterial.Get();
+			if (PhysMat)
+			{
+				EPhysicalSurface Surface = PhysMat->SurfaceType;
+				switch (Surface)
+				{
+				case SurfaceType1: Damage *= 2.0f; break;
+				case SurfaceType2: Damage *= 1.0f; break;
+				default: Damage *= 0.5f; break;
+				}
+			}
+
+			UGameplayStatics::ApplyPointDamage(
+				HitActor,
+				Damage,
+				HitResult.TraceEnd - HitResult.TraceStart,
+				HitResult,
+				GetOwner()->GetInstigatorController(),
+				this,
+				nullptr
+			);
+		}
 	}
 
 	ShootFireTweenComp->PlayFromStart();
@@ -301,6 +329,15 @@ void AGunActor::PlayFireSound()
 			GetWorld(),
 			FireBulletSound,
 			FirePoint->GetComponentLocation()
+		);
+
+		UAISense_Hearing::ReportNoiseEvent(
+			GetWorld(),
+			GetActorLocation(),
+			3.0f,
+			GetOwner(),
+			0.0f,
+			FName("Gunshot")
 		);
 	}
 }

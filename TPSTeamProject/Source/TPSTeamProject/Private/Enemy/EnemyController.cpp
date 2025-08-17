@@ -29,8 +29,6 @@ void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//SetGenericTeamId((FGenericTeamId(1))); 팀 ID 설정. 플레이어 연동 필요.
-
 	if (AIPerception)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AIPerception exists"));
@@ -43,7 +41,12 @@ void AEnemyController::BeginPlay()
 	if (BlackboardComp)
 	{
 		BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), false);
-		StartBehaviorTree();
+		BlackboardComp->SetValueAsBool(TEXT("WasDamaged"), false);
+		BlackboardComp->SetValueAsBool(TEXT("HeardNoise"), false);
+		if (!BlackboardComp->GetValueAsBool(TEXT("IsDead")))
+		{
+			StartBehaviorTree();
+		}
 	}
 }
 
@@ -66,16 +69,16 @@ void AEnemyController::OnPossess(APawn* InPawn)
 			SightConfig->SetMaxAge(WalkerData->SightMaxAge);
 
 			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-			SightConfig->DetectionByAffiliation.bDetectNeutrals = true;  //팀 ID 설정후 삭제
-			SightConfig->DetectionByAffiliation.bDetectFriendlies = true; //팀 ID 설정 후 삭제
+			SightConfig->DetectionByAffiliation.bDetectNeutrals = true; 
+			SightConfig->DetectionByAffiliation.bDetectFriendlies = false; 
 
 			HearingConfig->HearingRange = WalkerData->HearingRange;
 			HearingConfig->LoSHearingRange = WalkerData->LoSHearingRange;
 			HearingConfig->SetMaxAge(WalkerData->HearingMaxAge);
 
 			HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-			HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;  //팀 ID 설정후 삭제
-			HearingConfig->DetectionByAffiliation.bDetectFriendlies = true; //팀 ID 설정 후 삭제
+			HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;  
+			HearingConfig->DetectionByAffiliation.bDetectFriendlies = false; 
 
 			AIPerception->ConfigureSense(*SightConfig);
 			AIPerception->ConfigureSense(*HearingConfig);
@@ -130,20 +133,11 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 			{
 				BlackboardComp->SetValueAsObject(TEXT("TargetActor"), Actor);
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), true);
-				//if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
-				//{
-				//	AICharacter->SetMovementSpeed(AICharacter->RunSpeed);
-				//}
 				UE_LOG(LogTemp, Warning, TEXT("Sight Succeed"));
-
 			}
 			else
 			{
 				BlackboardComp->SetValueAsBool(TEXT("CanSeeTarget"), false);
-				//if (AEnemyCharacter* AICharacter = Cast<AEnemyCharacter>(GetPawn()))
-				//{
-				//	AICharacter->SetMovementSpeed(AICharacter->WalkSpeed);
-				//}
 			}
 		}
 	}

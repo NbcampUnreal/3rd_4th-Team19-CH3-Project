@@ -8,6 +8,7 @@
 #include "Util/Component/ObjectTweenComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KHY/Interactable/Interactable.h"
+#include "Stat/StatCalculater.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -32,7 +33,7 @@ AShooterCharacter::AShooterCharacter()
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	GunActor = GetWorld()->SpawnActor<AGunActor>(GunClass);
 	GetMesh()->HideBoneByName(TEXT("Weapon"), EPhysBodyOp::PBO_None);
 	GunActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon"));
@@ -479,5 +480,30 @@ void AShooterCharacter::Interaction()
 			}
 		}
 	}
+}
+
+float AShooterCharacter::TakeDamage(
+	float DamageAmount,
+	struct FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health -= ActualDamage;
+	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+
+	if (Health <= 0.0f)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player is dead."));
+		OnDeath();
+	}
+
+	return ActualDamage;
+}
+
+void AShooterCharacter::OnDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Death!"));
 }
 
