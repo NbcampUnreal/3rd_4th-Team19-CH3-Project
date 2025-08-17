@@ -23,6 +23,12 @@ protected:
 public:	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	TSubclassOf<AItem> DropCoin;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	TObjectPtr<UDataTable> AttachmentLootTable;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float AttachmentDropChance = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	TSubclassOf<AItem> CommonAttachmentItemClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* BodyCollision;
@@ -81,6 +87,7 @@ public:
 	void OnDeathAnimationFinished();
 
 	void DropItems();
+	void DropAttachment();
 
 private:
 	FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
