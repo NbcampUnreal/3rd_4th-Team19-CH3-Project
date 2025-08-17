@@ -12,6 +12,9 @@
 #include "Taeyeon/InventoryWidget.h"
 #include "Taeyeon/ItemComponent.h"
 #include "Stat/StatCalculater.h"
+#include "TPSGameInstance.h"
+#include "Manager/GameInstanceSubsystem/ObserverManager.h"
+#include "Manager/ObserverManager/MessageType.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -42,6 +45,14 @@ void AShooterCharacter::BeginPlay()
 	GetMesh()->HideBoneByName(TEXT("Weapon"), EPhysBodyOp::PBO_None);
 	GunActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon"));
 	GunActor->SetOwner(this);
+
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		ObserverManager->Subscribe(this);
+	}
 
 	ShootDelegate.BindLambda([this]()
 	{
@@ -550,6 +561,20 @@ float AShooterCharacter::TakeDamage(
 	}
 
 	return ActualDamage;
+}
+
+void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
+{
+	if (InMsgType == EMessageType::UpdateStat)
+	{
+		int32 MaxHealth = 0;
+		for (const auto StatCalculater : StatCalculaters)
+		{
+			MaxHealth += StatCalculater->GetMaxHP();
+		}
+
+		Health = MaxHealth;
+	}
 }
 
 void AShooterCharacter::OnDeath()
