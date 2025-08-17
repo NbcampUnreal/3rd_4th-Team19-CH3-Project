@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-//#include "GenericTeamAgentInterface.h"  //팀 ID 설정
+#include "GenericTeamAgentInterface.h"  //팀 ID 설정
 #include "Components/CapsuleComponent.h"
 #include "GameData/EnemyStatDataStruct.h"
 #include "EnemyCharacter.generated.h"
 
 UCLASS()
-class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter //,public IGenericTeamAgentInterface
+class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter ,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -19,17 +19,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	//타격영역 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
+	UCapsuleComponent* BodyCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* RightArmCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* LeftArmCollision;
 
-	//데이터타입
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataType")
 	EEnemyType EnemyType;
 
-	//애니 몽타주
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* DeathMontage;
 
@@ -46,24 +45,29 @@ public:
 	UPROPERTY()
 	bool bHasGivenDamage = false;
 
+	float BaseDamage;
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	//virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; } //팀 ID
-	//virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; } //팀 ID
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override { TeamId = NewTeamID; } //팀 ID
 
 	UFUNCTION()
-	void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
+	virtual void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	void SetMovementSpeed(float NewSpeed);
+	void ResetDamage();
+	void MultiplyDamage(float Multiplier);
+
+	void UpdateMovementSpeed();
 
 	void EnableRightArmCollision(bool bEnable);
 	void EnableBothArmCollision(bool bEnable);
@@ -72,7 +76,7 @@ public:
 	void OnDeathAnimationFinished();
 
 private:
-	//FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
+	FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
 	FTimerHandle DeathTimerHandle;
 
 };

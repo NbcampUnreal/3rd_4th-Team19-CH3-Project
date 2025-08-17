@@ -12,6 +12,7 @@ class UInventoryComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
+class UStatCalculater;
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter
@@ -32,8 +33,8 @@ public:
 	TObjectPtr<UCameraComponent> CameraComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timeline")
-	TObjectPtr<UCurveFloat> ZoomCurveFloat;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> FireMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,13 +51,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	bool bIsCloseContact;
 
+	float Health = 100.0f;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> InventoryComp;
-
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -64,6 +67,14 @@ public:
 
 	UFUNCTION()
 	void ToggleInventory();
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
+
+	void OnDeath();
 
 private:
 

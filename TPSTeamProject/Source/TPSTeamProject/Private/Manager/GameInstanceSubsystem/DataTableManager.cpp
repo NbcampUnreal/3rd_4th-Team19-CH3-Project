@@ -4,6 +4,7 @@
 #include "GameData/WeaponAttachmentDataStruct.h"
 #include "GameData/EnemyStatDataStruct.h"
 #include "GameData/ItemDataStruct.h"
+#include "GameData/EnemySkillDataStruct.h"
 
 
 UDataTableManager::UDataTableManager()
@@ -20,6 +21,7 @@ void UDataTableManager::Init()
 	AddDataTable<FWeaponAttachmentDataStruct>(EDataType::WeaponAttachment, FString(TEXT("WeaponAttachmentData.WeaponAttachmentData")));
 	AddDataTable<FEnemyStatDataStruct>(EDataType::EnemyStat, FString(TEXT("EnemyStatData.EnemyStatData")));
 	AddDataTable<FItemDataStruct>(EDataType::Item, FString(TEXT("ItemData.ItemData")));
+	AddDataTable<FEnemySkillDataStruct>(EDataType::EnemySkill, FString(TEXT("EnemySkillData.EnemySkillData")));
 
 }
 

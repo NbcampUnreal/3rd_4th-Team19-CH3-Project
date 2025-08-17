@@ -5,7 +5,6 @@
 UBTService_SetPatrolDecision::UBTService_SetPatrolDecision()
 {
 	NodeName = TEXT("Set Patrol Decision");
-	bNotifyBecomeRelevant = true;
 	Interval = 1.0f;
 }
 

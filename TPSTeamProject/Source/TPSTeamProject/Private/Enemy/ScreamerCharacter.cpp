@@ -1,0 +1,41 @@
+#include "Enemy/ScreamerCharacter.h"
+#include "Enemy/ScreamerController.h"
+#include "NavigationSystem.h"
+
+AScreamerCharacter::AScreamerCharacter()
+{
+	AIControllerClass = AScreamerController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	EnemyType = EEnemyType::Screamer;
+}
+
+void AScreamerCharacter::Scream()
+{
+	if (!EnemyToSpawnClass) return;
+
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+	if (!NavSystem) return;
+
+	FVector ScreamerLocation = GetActorLocation();
+
+	for (int32 i = 0; i < SpawnCount; ++i)
+	{
+		FNavLocation RandomLocation;
+		bool bFound = NavSystem->GetRandomReachablePointInRadius(
+			ScreamerLocation,
+			SpawnRadius,
+			RandomLocation
+		);
+
+		if (bFound)
+		{
+			FVector SpawnLoc = RandomLocation.Location;
+
+			FVector DirectionToScreamer = (ScreamerLocation - SpawnLoc).GetSafeNormal();
+			FRotator SpawnRot = DirectionToScreamer.Rotation();
+
+			GetWorld()->SpawnActor<AWalkerCharacter>(EnemyToSpawnClass, SpawnLoc, SpawnRot);
+		}
+	}
+}

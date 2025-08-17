@@ -16,6 +16,9 @@ AEnemyCharacter::AEnemyCharacter()
 	Movement->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 	Movement->AirControl = 0.2f;
 
+	BodyCollision = GetCapsuleComponent();
+	BodyCollision->SetGenerateOverlapEvents(false);
+
 	RightArmCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RightArmCollision"));
 	RightArmCollision->SetupAttachment(GetMesh(), TEXT("hand_r"));
 	RightArmCollision->SetGenerateOverlapEvents(false);
@@ -48,6 +51,8 @@ void AEnemyCharacter::BeginPlay()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = WalkSpeed;
 
+	BaseDamage = Damage;
+
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
 	{
@@ -62,13 +67,12 @@ float AEnemyCharacter::TakeDamage(
 	float DamageAmount,
 	struct FDamageEvent const& DamageEvent,
 	AController* EventInstigator,
-	AActor* DamageCauser
-)
+	AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	Health -= ActualDamage;
-	UE_LOG(LogTemp, Warning, TEXT("Player took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+	UE_LOG(LogTemp, Warning, TEXT("[Enemy] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
 
 	if (Health <= 0.0f)
 	{
@@ -86,7 +90,7 @@ float AEnemyCharacter::TakeDamage(
 			{
 				FVector HitLocation = InstigatorPawn->GetActorLocation();
 				AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("WasDamaged"), true);
-				AIController->GetBlackboardComponent()->SetValueAsVector(TEXT("DamagedLocation"), HitLocation);
+				AIController->GetBlackboardComponent()->SetValueAsVector(TEXT("HitLocation"), HitLocation);
 			}
 		}
 	}
@@ -94,12 +98,31 @@ float AEnemyCharacter::TakeDamage(
 	return ActualDamage;
 }
 
-void AEnemyCharacter::SetMovementSpeed(float NewSpeed)
+void AEnemyCharacter::ResetDamage()
 {
-	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
-	{
-		Movement->MaxWalkSpeed = NewSpeed;
-	}
+	Damage = BaseDamage;
+}
+
+void AEnemyCharacter::MultiplyDamage(float Multiplier)
+{
+	Damage = BaseDamage * Multiplier;
+}
+
+void AEnemyCharacter::UpdateMovementSpeed()
+{
+	AEnemyController* AIController = Cast<AEnemyController>(GetController());
+	if (!AIController) return;
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	if (!Movement) return;
+
+	bool bTaskRunning = AIController->GetBlackboardComponent()->GetValueAsBool(TEXT("TaskRunning"));
+	bool bCanSeeTarget = AIController->GetBlackboardComponent()->GetValueAsBool(TEXT("CanSeeTarget"));
+
+	if (bTaskRunning || bCanSeeTarget)
+		Movement->MaxWalkSpeed = RunSpeed;
+	else
+		Movement->MaxWalkSpeed = WalkSpeed;
 }
 
 void AEnemyCharacter::EnableRightArmCollision(bool bEnable)
@@ -142,7 +165,9 @@ void AEnemyCharacter::OnDeath()
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("IsDead?"));
 		AIController->GetBlackboardComponent()->SetValueAsBool(TEXT("IsDead"), true);
+		AIController->BrainComponent->StopLogic("Dead");
 		AIController->UnPossess();
 	}
 
@@ -153,14 +178,20 @@ void AEnemyCharacter::OnDeath()
 	if (DeathMontage && GetMesh())
 	{
 		float Duration = PlayAnimMontage(DeathMontage);
-
-		GetWorldTimerManager().SetTimer(
-			DeathTimerHandle,
-			this,
-			&AEnemyCharacter::OnDeathAnimationFinished,
-			Duration,
-			false
-		);
+		if (Duration > 0.0f)
+		{
+			GetWorldTimerManager().SetTimer(
+				DeathTimerHandle,
+				this,
+				&AEnemyCharacter::OnDeathAnimationFinished,
+				Duration,
+				false
+			);
+		}
+		else
+		{
+			Destroy();
+		}
 	}
 	else
 	{
@@ -171,5 +202,3 @@ void AEnemyCharacter::OnDeathAnimationFinished()
 {
 	Destroy();
 }
-
-

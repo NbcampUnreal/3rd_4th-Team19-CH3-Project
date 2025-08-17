@@ -17,9 +17,10 @@ public class TPSTeamProject : ModuleRules
 			"AIModule",
 			"NavigationSystem",
 			"GameplayTasks",
-			"UMG"
-		});
-
+			"UMG",
+            "Niagara"
+        });
+		
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
 		// Uncomment if you are using Slate UI
