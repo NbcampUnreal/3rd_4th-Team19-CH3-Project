@@ -16,6 +16,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
 class UStatCalculater;
+class USoundCue;
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
@@ -40,6 +41,10 @@ public:
 	TObjectPtr<UAnimMontage> FireMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> ReloadMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	TObjectPtr<USoundCue> DeathSound;
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,7 +92,12 @@ public:
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 
+	UFUNCTION()
 	void OnDeath();
+	UFUNCTION()
+	void PlaySoundDeath();
+	UFUNCTION()
+	void PlayAnimationDeath();
 
 private:
 

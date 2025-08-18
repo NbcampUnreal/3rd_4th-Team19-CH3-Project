@@ -15,6 +15,7 @@
 #include "TPSGameInstance.h"
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
+#include "Sound/SoundCue.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -651,5 +652,61 @@ void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
 void AShooterCharacter::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Death!"));
+
+	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->UnPossess();
+	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+
+	if (DeathSound)
+	{
+		PlaySoundDeath();
+	}
+
+	if (DeathMontage)
+	{
+		PlayAnimationDeath();
+	}
+	else
+	{
+		Destroy();
+	}
+}
+
+
+void AShooterCharacter::PlaySoundDeath()
+{
+	if (!DeathSound)	return;
+
+	if (DeathSound->IsPlayable())
+	{
+		UGameplayStatics::PlaySound2D(this, DeathSound);
+	}
+}
+
+void AShooterCharacter::PlayAnimationDeath()
+{
+	float Duration = PlayAnimMontage(DeathMontage);
+
+	if (Duration > 0.0f)
+	{
+		FTimerHandle DeathTimerHandle;
+		GetWorldTimerManager().SetTimer(
+			DeathTimerHandle,
+			[this]() {
+				this->Destroy();
+			},
+			Duration - 0.2f,
+			false
+		);
+	}
+	else
+	{
+		Destroy();
+	}
 }
 
