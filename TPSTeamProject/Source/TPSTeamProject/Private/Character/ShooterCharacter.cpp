@@ -5,10 +5,16 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Taeyeon/InventoryComponent.h"
 #include "Util/Component/ObjectTweenComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "KHY/Interactable/Interactable.h"
+#include "Taeyeon/InventoryWidget.h"
+#include "Taeyeon/ItemComponent.h"
 #include "Stat/StatCalculater.h"
+#include "TPSGameInstance.h"
+#include "Manager/GameInstanceSubsystem/ObserverManager.h"
+#include "Manager/ObserverManager/MessageType.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -24,6 +30,7 @@ AShooterCharacter::AShooterCharacter()
 	CameraComp->bUsePawnControlRotation = false;
 
 	ZoomTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ZoomTween"));
+	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 
 	bIsZoom = false;
 	bIsAuto = false;
@@ -38,6 +45,16 @@ void AShooterCharacter::BeginPlay()
 	GetMesh()->HideBoneByName(TEXT("Weapon"), EPhysBodyOp::PBO_None);
 	GunActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Weapon"));
 	GunActor->SetOwner(this);
+
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		ObserverManager->Subscribe(this);
+	}
+
+	StatCalculaters.Add(GunActor->GetStatCalculater());
 
 	ShootDelegate.BindLambda([this]()
 	{
@@ -89,6 +106,33 @@ void AShooterCharacter::BeginPlay()
 		ZoomTimeline->AddInterpFloat(ZoomCurveFloat, TimelineProgress);
 		ZoomTimeline->SetTimelineFinishedFunc(TimelineFinished);
 	}*/
+
+	InventoryComp->OnInventoryUpdated.AddDynamic(this, &AShooterCharacter::OnInventoryUpdated);
+	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
+}
+
+void AShooterCharacter::ToggleInventory()
+{
+	check(InventoryWidgetClass);
+
+	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
+	check(PlayerController)
+	{
+		if (InventoryWidget->IsInViewport())
+		{
+			InventoryWidget->RemoveFromParent();
+			PlayerController->SetInputMode(FInputModeGameOnly());
+			PlayerController->SetShowMouseCursor(false);
+		}
+		else
+		{
+			InventoryWidget->AddToViewport();
+			PlayerController->SetInputMode(FInputModeUIOnly().SetWidgetToFocus(InventoryWidget->TakeWidget()));
+			PlayerController->SetShowMouseCursor(true);
+			InventoryWidget->SetKeyboardFocus();
+			InventoryWidget->RefreshInventory(InventoryComp);
+		}
+	}
 }
 
 // Called every frame
@@ -194,6 +238,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					ETriggerEvent::Triggered,
 					this,
 					&AShooterCharacter::Interaction
+				);
+			}
+
+			ensure(PlayerController->InventoryToggleAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->InventoryToggleAction,
+					ETriggerEvent::Completed,
+					this,
+					&AShooterCharacter::ToggleInventory
 				);
 			}
 		}
@@ -452,7 +506,7 @@ void AShooterCharacter::Interaction()
 		200.f,
 		UEngineTypes::ConvertToTraceType(ECC_Visibility),
 		false,
-		{ this },
+		{this},
 		EDrawDebugTrace::ForDuration,
 		OutHits,
 		true
@@ -468,7 +522,8 @@ void AShooterCharacter::Interaction()
 				if (HitComponent && HitComponent->ComponentTags.Contains(TEXT("Interaction")))
 				{
 					AActor* HitActor = Hit.GetActor();
-					IInteractable* InteractableActor = Cast<IInteractable>(HitActor);
+					UItemComponent* ItemComponent = HitActor->FindComponentByClass<UItemComponent>();
+					IInteractable* InteractableActor = Cast<IInteractable>(ItemComponent);
 
 					if (InteractableActor && HitActor)
 					{
@@ -479,6 +534,14 @@ void AShooterCharacter::Interaction()
 				}
 			}
 		}
+	}
+}
+
+void AShooterCharacter::OnInventoryUpdated()
+{
+	if (InventoryWidget && InventoryWidget->IsInViewport())
+	{
+		InventoryWidget->RefreshInventory(InventoryComp);
 	}
 }
 
@@ -500,6 +563,20 @@ float AShooterCharacter::TakeDamage(
 	}
 
 	return ActualDamage;
+}
+
+void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
+{
+	if (InMsgType == EMessageType::UpdateStat)
+	{
+		int32 MaxHealth = 0;
+		for (const auto StatCalculater : StatCalculaters)
+		{
+			MaxHealth += StatCalculater->GetMaxHP();
+		}
+
+		Health = MaxHealth;
+	}
 }
 
 void AShooterCharacter::OnDeath()

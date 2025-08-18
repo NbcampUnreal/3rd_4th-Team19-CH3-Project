@@ -162,6 +162,8 @@ void AEnemyCharacter::OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 
 void AEnemyCharacter::OnDeath()
 {
+
+
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
 	{

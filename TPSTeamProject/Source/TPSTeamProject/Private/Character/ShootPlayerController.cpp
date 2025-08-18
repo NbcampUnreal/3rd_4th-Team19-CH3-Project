@@ -10,6 +10,7 @@ AShootPlayerController::AShootPlayerController()
 	, ZoomAction(nullptr)
 	, TurnAutoAction(nullptr)
 	, InteractionAction(nullptr)
+	, InventoryToggleAction(nullptr)
 {
 
 }

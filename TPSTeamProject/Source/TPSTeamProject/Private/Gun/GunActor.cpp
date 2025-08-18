@@ -135,9 +135,11 @@ void AGunActor::Fire()
 			Params
 		);
 
-		DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
+		//DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
 	}
 
+	UMaterialInterface* BulletDecal = nullptr;
+	float DecalLifeSpan = 0.f;
 	if (bHit)
 	{
 		AActor* HitActor = HitResult.GetActor();
@@ -148,16 +150,15 @@ void AGunActor::Fire()
 		{
 			float Damage = StatCalculater->GetAtkDamage();
 
-			UPhysicalMaterial* PhysMat = HitResult.PhysMaterial.Get();
-			if (PhysMat)
+			FName HitBoneName = HitResult.BoneName;
+			UE_LOG(LogTemp, Warning, TEXT("Hit BoneName: %s"), *HitBoneName.ToString());
+			if (HitBoneName == HitBone_Head)
 			{
-				EPhysicalSurface Surface = PhysMat->SurfaceType;
-				switch (Surface)
-				{
-				case SurfaceType1: Damage *= 2.0f; break;
-				case SurfaceType2: Damage *= 1.0f; break;
-				default: Damage *= 0.5f; break;
-				}
+				Damage *= 1.5f;
+			}
+			else
+			{
+				Damage *= 1.0f;
 			}
 
 			UGameplayStatics::ApplyPointDamage(
@@ -168,6 +169,27 @@ void AGunActor::Fire()
 				GetOwner()->GetInstigatorController(),
 				this,
 				nullptr
+			);
+
+			BulletDecal = EnemyHitParticle;
+			DecalLifeSpan = 0.5f;
+		}
+		else
+		{
+			BulletDecal = NonEnemyHitParticle;
+			DecalLifeSpan = 5.f;
+		}
+
+		if (BulletDecal)
+		{
+			FRotator DecalRotation = (-HitResult.ImpactNormal).Rotation();
+			UGameplayStatics::SpawnDecalAtLocation(
+				this,
+				BulletDecal,
+				FVector(16.f, 16.f, 16.f),
+				HitResult.Location,
+				DecalRotation,
+				DecalLifeSpan
 			);
 		}
 	}
@@ -194,6 +216,11 @@ void AGunActor::ChangeParts(int32 Index, EAttachmentSlot InType)
 	EquipPartsMap[InType]->ChangeItem(Index);
 
 	StatCalculater->UpdateStat();
+}
+
+UStatCalculater* AGunActor::GetStatCalculater() const
+{
+	return StatCalculater;
 }
 
 void AGunActor::OnFireLight()

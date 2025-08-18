@@ -148,6 +148,9 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 		{
 			BlackboardComp->SetValueAsVector(TEXT("HeardLocation"), Stimulus.StimulusLocation);
 			BlackboardComp->SetValueAsBool(TEXT("HeardNoise"), true);
+
+			bool bHeardNoise = BlackboardComp->GetValueAsBool(TEXT("HeardNoise"));
+			UE_LOG(LogTemp, Warning, TEXT("BB HeardNoise: %s"), bHeardNoise ? TEXT("true") : TEXT("false"));
 			UE_LOG(LogTemp, Warning, TEXT("HeardNoise Succeed"));
 		}
 	}

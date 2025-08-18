@@ -1,0 +1,4 @@
+Name,Index,ItemType,StackSize,ItemIconTexture,WorldMesh
+GoldCoin,1,Coin,3,/Script/Engine.Texture2D'/Game/Icon/1.1',/Script/Engine.StaticMesh'/Game/Medieval_Sewer_Dungeon/Static_Meshes/Props/SM_Coin_1.SM_Coin_1'
+SilverCoin,2,Coin,3,/Script/Engine.Texture2D'/Game/Icon/2.2',/Script/Engine.StaticMesh'/Game/Medieval_Sewer_Dungeon/Static_Meshes/Props/SM_Coin_2.SM_Coin_2'
+BronzeCoin,3,Coin,3,/Script/Engine.Texture2D'/Game/Icon/3.3',/Script/Engine.StaticMesh'/Game/Medieval_Sewer_Dungeon/Static_Meshes/Props/SM_Coin_3.SM_Coin_3'

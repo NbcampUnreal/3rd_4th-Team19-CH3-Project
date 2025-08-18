@@ -12,6 +12,7 @@ enum class EDataType : uint8
 	WeaponStat UMETA(DisplayName = "WeaponStat"),
 	WeaponAttachment UMETA(DisplayName = "WeaponAttachment"),
 	EnemyStat UMETA(DisplayName = "EnemyStat"),
+	Item UMETA(DisplayName = "Item"),
 	EnemySkill UMETA(DisplayName = "EnemySkill")
 };
 

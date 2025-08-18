@@ -33,6 +33,8 @@ public:
 	TObjectPtr<UInputAction> TurnAutoAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> InteractionAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputAction> InventoryToggleAction;
 
 
 protected:

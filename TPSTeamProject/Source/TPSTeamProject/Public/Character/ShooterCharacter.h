@@ -4,15 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Manager/ObserverManager/Observer.h"
 #include "ShooterCharacter.generated.h"
 
+struct FInputActionValue;
+class UInventoryWidget;
+class UInventoryComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
 class UStatCalculater;
 
 UCLASS()
-class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter
+class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver
 {
 	GENERATED_BODY()
 
@@ -47,19 +51,33 @@ protected:
 	bool bIsZoom;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	bool bIsCloseContact;
+	UPROPERTY()
+	TArray<TObjectPtr<UStatCalculater>> StatCalculaters;
 
 	float Health = 100.0f;
-
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
+	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComp;
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+	void ToggleInventory();
 
 	virtual float TakeDamage(
 		float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+
+	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
 	void OnDeath();
 
@@ -93,6 +111,8 @@ private:
 	void ZoomTimelineFinished();
 	UFUNCTION()
 	void Interaction();
+	UFUNCTION()
+	void OnInventoryUpdated();
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;

@@ -3,6 +3,7 @@
 #include "GameData/WeaponStatDataStruct.h"
 #include "GameData/WeaponAttachmentDataStruct.h"
 #include "GameData/EnemyStatDataStruct.h"
+#include "GameData/ItemDataStruct.h"
 #include "GameData/EnemySkillDataStruct.h"
 
 
@@ -19,7 +20,9 @@ void UDataTableManager::Init()
 	AddDataTable<FWeaponStatDataStruct>(EDataType::WeaponStat, FString(TEXT("WeaponStatData.WeaponStatData")));
 	AddDataTable<FWeaponAttachmentDataStruct>(EDataType::WeaponAttachment, FString(TEXT("WeaponAttachmentData.WeaponAttachmentData")));
 	AddDataTable<FEnemyStatDataStruct>(EDataType::EnemyStat, FString(TEXT("EnemyStatData.EnemyStatData")));
+	AddDataTable<FItemDataStruct>(EDataType::Item, FString(TEXT("ItemData.ItemData")));
 	AddDataTable<FEnemySkillDataStruct>(EDataType::EnemySkill, FString(TEXT("EnemySkillData.EnemySkillData")));
+
 }
 
 UCacheDataTable* UDataTableManager::GetTable(EDataType InType)
