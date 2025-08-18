@@ -7,6 +7,7 @@
 
 class USphereComponent;
 class USoundCue;
+class UObjectTweenComponent;
 
 UCLASS()
 class TPSTEAMPROJECT_API ABaseNPC : public ACharacter, public IInteractable
@@ -28,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundCue* Sound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	TObjectPtr<UObjectTweenComponent> LookTween;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Roatation")
 	float RotationSpeed;
 
@@ -40,16 +44,23 @@ protected:
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 public:
-	virtual void Tick(float DeltaTime) override;
+
+	void PlaySound();
+	void PlayAnimation();
 
 	UFUNCTION()
-	void LookCharacter(float DeltaTime);
+	void LookCharacter(float InValue);
+
+	void LookStart();
+	void LookEnd();
 
 	virtual void Interact(AActor* Interactor) override;
 
 private:
 	bool bExist;
 	bool bInteract;
-	AActor* Player;
+	ACharacter* Player;
 
+	FTimerDelegate LookDelegate;
+	FTimerHandle LookTimerHandle;
 };

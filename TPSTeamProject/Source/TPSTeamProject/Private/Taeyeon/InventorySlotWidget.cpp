@@ -4,10 +4,11 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "GameData/ItemDataStruct.h"
-#include "Taeyeon/InventoryComponent.h"
 
 void UInventorySlotWidget::UpdateSlot(const FInventorySlot& SlotData, const UDataTable* ItemDataTable)
 {
+	CurrentSlotData = SlotData;
+
 	if (!ItemDataTable) return;
 
 	if (SlotData.ItemName.IsNone())
@@ -34,4 +35,17 @@ void UInventorySlotWidget::UpdateSlot(const FInventorySlot& SlotData, const UDat
 			}
 		}
 	}
+}
+
+FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		if (!CurrentSlotData.ItemName.IsNone())
+		{
+			OnSlotRightClicked.Broadcast(CurrentSlotData);
+			return FReply::Handled();
+		}
+	}
+	return FReply::Unhandled();
 }

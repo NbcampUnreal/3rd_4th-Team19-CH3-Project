@@ -5,11 +5,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimationAsset.h"
 #include "Sound/SoundCue.h"
+#include "Util/Component/ObjectTweenComponent.h"
 
 
 ABaseNPC::ABaseNPC()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	DetectionSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
 	DetectionSphereComp->SetupAttachment(RootComponent);
@@ -22,6 +23,7 @@ ABaseNPC::ABaseNPC()
 	TagCapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
 	TagCapsuleComp->SetupAttachment(RootComponent);
 
+	LookTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("LookTween"));
 
 	bExist = false;
 	bInteract = false;
@@ -34,19 +36,38 @@ ABaseNPC::ABaseNPC()
 void ABaseNPC::BeginPlay()
 {
 	Super::BeginPlay();
-	
-}
 
-void ABaseNPC::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bExist)
+	LookDelegate.BindLambda([this]()
 	{
-		LookCharacter(DeltaTime);
-	}
+		if (IsValid(Player) == false && bExist)
+		{
+			return;
+		}
 
+		LookTween->PlayFromStart();
+	});
+
+	LookTween->AddFloatEvent(this, FName("LookCharacter"), FName(NAME_None));
 }
+
+
+void ABaseNPC::PlaySound()
+{
+	if (!Sound)	return;
+
+	if (Sound->IsPlayable())
+	{
+		UGameplayStatics::PlaySound2D(this, Sound);
+	}
+}
+
+void ABaseNPC::PlayAnimation()
+{
+	if (!Animation)	return;	
+
+	GetMesh()->PlayAnimation(Animation, false);
+}
+
 
 void ABaseNPC::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -56,20 +77,11 @@ void ABaseNPC::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s Position"), *OtherActor->GetName());
 			bExist = true;
-			Player = OtherActor;
+			Player = Cast<ACharacter>(OtherActor);
 
-			if (Sound)
-			{
-				if (Sound->IsPlayable())
-				{
-					UGameplayStatics::PlaySound2D(this, Sound);
-				}
-			}
-
-			if (Animation)
-			{
-				GetMesh()->PlayAnimation(Animation, false);
-			}
+			PlaySound();
+			PlayAnimation();	
+			LookStart();
 		}
 	}
 }
@@ -85,12 +97,13 @@ void ABaseNPC::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 			{
 				bExist = false;
 				Player = nullptr;
+				LookEnd();
 			}
 		}
 	}
 }
 
-void ABaseNPC::LookCharacter(float DeltaTime)
+void ABaseNPC::LookCharacter(float InValue)
 {
 	if (Player)
 	{
@@ -99,10 +112,29 @@ void ABaseNPC::LookCharacter(float DeltaTime)
 		FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(NPCLocation, PlayerLocation);
 		TargetRotation.Pitch = 0.0f;
 		FRotator CurrentRotation = GetActorRotation();
-		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed);
+
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, InValue, RotationSpeed);
 
 
 		SetActorRotation(NewRotation);
+	}
+}
+
+void ABaseNPC::LookStart()
+{
+	GetWorldTimerManager().SetTimer(
+		LookTimerHandle,
+		LookDelegate,
+		0.1f,
+		true
+	);
+}
+
+void ABaseNPC::LookEnd()
+{
+	if (LookTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(LookTimerHandle);
 	}
 }
 
