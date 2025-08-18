@@ -84,11 +84,12 @@ public:
 
 	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
+	UFUNCTION()
 	void OnDeath();
-	void DeathPlaySound();
-	void DeathPlayAnimation();
-
-	bool bDie = false;
+	UFUNCTION()
+	void PlaySoundDeath();
+	UFUNCTION()
+	void PlayAnimationDeath();
 
 private:
 

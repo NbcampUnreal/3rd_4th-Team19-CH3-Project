@@ -140,10 +140,6 @@ void AShooterCharacter::ToggleInventory()
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Health <= 0.0f && !bDie)
-	{
-		OnDeath();
-	}
 }
 
 // Called to bind functionality to input
@@ -298,7 +294,6 @@ void AShooterCharacter::StopJump(const FInputActionValue& value)
 {
 	if (!value.Get<bool>())
 	{
-		Health -= 50.0f;
 		StopJumping();
 	}
 }
@@ -589,8 +584,6 @@ void AShooterCharacter::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Death!"));
 
-	bDie = true;
-
 	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -599,14 +592,15 @@ void AShooterCharacter::OnDeath()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+
 	if (DeathSound)
 	{
-		DeathPlaySound();
+		PlaySoundDeath();
 	}
 
 	if (DeathMontage)
 	{
-		DeathPlayAnimation();
+		PlayAnimationDeath();
 	}
 	else
 	{
@@ -615,7 +609,7 @@ void AShooterCharacter::OnDeath()
 }
 
 
-void AShooterCharacter::DeathPlaySound()
+void AShooterCharacter::PlaySoundDeath()
 {
 	if (!DeathSound)	return;
 
@@ -625,18 +619,19 @@ void AShooterCharacter::DeathPlaySound()
 	}
 }
 
-void AShooterCharacter::DeathPlayAnimation()
+void AShooterCharacter::PlayAnimationDeath()
 {
-	FTimerHandle DeathTimerHandle;
 	float Duration = PlayAnimMontage(DeathMontage);
+
 	if (Duration > 0.0f)
 	{
+		FTimerHandle DeathTimerHandle;
 		GetWorldTimerManager().SetTimer(
 			DeathTimerHandle,
 			[this]() {
 				this->Destroy();
 			},
-			Duration,
+			Duration - 0.2f,
 			false
 		);
 	}
