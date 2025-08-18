@@ -7,6 +7,7 @@
 #include "Manager/ObserverManager/Observer.h"
 #include "ShooterCharacter.generated.h"
 
+struct FInventorySlot;
 struct FInputActionValue;
 class UInventoryWidget;
 class UInventoryComponent;
@@ -113,6 +114,8 @@ private:
 	void Interaction();
 	UFUNCTION()
 	void OnInventoryUpdated();
+	UFUNCTION()
+	void HandleItemUse(const FInventorySlot& SlotData);
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;

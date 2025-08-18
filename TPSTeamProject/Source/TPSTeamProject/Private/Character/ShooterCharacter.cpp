@@ -109,6 +109,7 @@ void AShooterCharacter::BeginPlay()
 
 	InventoryComp->OnInventoryUpdated.AddDynamic(this, &AShooterCharacter::OnInventoryUpdated);
 	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
+	InventoryWidget->OnItemUseRequested.AddDynamic(this, &AShooterCharacter::HandleItemUse);
 }
 
 void AShooterCharacter::ToggleInventory()
@@ -543,6 +544,15 @@ void AShooterCharacter::OnInventoryUpdated()
 	{
 		InventoryWidget->RefreshInventory(InventoryComp);
 	}
+}
+
+void AShooterCharacter::HandleItemUse(const FInventorySlot& SlotData)
+{
+	if (SlotData.ItemName.IsNone())
+	{
+		return;
+	}
+	
 }
 
 float AShooterCharacter::TakeDamage(
