@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Manager/ObserverManager/Observer.h"
 #include "ShooterCharacter.generated.h"
 
 struct FInputActionValue;
@@ -15,7 +16,7 @@ class UObjectTweenComponent;
 class UStatCalculater;
 
 UCLASS()
-class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter
+class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver
 {
 	GENERATED_BODY()
 
@@ -50,6 +51,8 @@ protected:
 	bool bIsZoom;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
 	bool bIsCloseContact;
+	UPROPERTY()
+	TArray<TObjectPtr<UStatCalculater>> StatCalculaters;
 
 	float Health = 100.0f;
 	
@@ -73,6 +76,8 @@ public:
 		struct FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+
+	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
 	void OnDeath();
 

@@ -9,6 +9,7 @@ class UCameraComponent;
 class UPointLightComponent;
 class UObjectTweenComponent;
 class UEquipmentParts;
+class UStatCalculater;
 class UGunStatCalculater;
 enum class EAttachmentSlot : uint8;
 
@@ -33,6 +34,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ChangeParts(int32 Index, EAttachmentSlot InType);
+
+	FORCEINLINE UStatCalculater* GetStatCalculater() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
@@ -84,6 +87,10 @@ protected:
 	TObjectPtr<USoundBase> FireBulletSound;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shoot")
 	bool IsFire;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UMaterialInterface> EnemyHitParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UMaterialInterface> NonEnemyHitParticle;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();
@@ -121,4 +128,5 @@ private:
 	void UpdateShooterStat();
 
 	FCollisionQueryParams Params;
+	const FName HitBone_Head = FName("head");
 };
