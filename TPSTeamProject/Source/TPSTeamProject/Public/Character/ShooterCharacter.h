@@ -86,6 +86,7 @@ public:
 
 	void OnDeath();
 	void DeathPlaySound();
+	void DeathPlayAnimation();
 
 	bool bDie = false;
 

@@ -606,23 +606,7 @@ void AShooterCharacter::OnDeath()
 
 	if (DeathMontage)
 	{
-		FTimerHandle DeathTimerHandle;
-		float Duration = PlayAnimMontage(DeathMontage);
-		if (Duration > 0.0f)
-		{
-			GetWorldTimerManager().SetTimer(
-				DeathTimerHandle,
-				[this]() {
-					this->Destroy();
-				},
-				Duration,
-				false
-			);
-		}
-		else
-		{
-			Destroy();
-		}
+		DeathPlayAnimation();
 	}
 	else
 	{
@@ -638,6 +622,27 @@ void AShooterCharacter::DeathPlaySound()
 	if (DeathSound->IsPlayable())
 	{
 		UGameplayStatics::PlaySound2D(this, DeathSound);
+	}
+}
+
+void AShooterCharacter::DeathPlayAnimation()
+{
+	FTimerHandle DeathTimerHandle;
+	float Duration = PlayAnimMontage(DeathMontage);
+	if (Duration > 0.0f)
+	{
+		GetWorldTimerManager().SetTimer(
+			DeathTimerHandle,
+			[this]() {
+				this->Destroy();
+			},
+			Duration,
+			false
+		);
+	}
+	else
+	{
+		Destroy();
 	}
 }
 
