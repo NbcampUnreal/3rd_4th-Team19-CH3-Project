@@ -15,6 +15,7 @@
 #include "TPSGameInstance.h"
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
+#include "Sound/SoundCue.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -139,6 +140,10 @@ void AShooterCharacter::ToggleInventory()
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (Health <= 0.0f && !bDie)
+	{
+		OnDeath();
+	}
 }
 
 // Called to bind functionality to input
@@ -293,6 +298,7 @@ void AShooterCharacter::StopJump(const FInputActionValue& value)
 {
 	if (!value.Get<bool>())
 	{
+		Health -= 50.0f;
 		StopJumping();
 	}
 }
@@ -582,5 +588,56 @@ void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
 void AShooterCharacter::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Death!"));
+
+	bDie = true;
+
+	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->UnPossess();
+	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (DeathSound)
+	{
+		DeathPlaySound();
+	}
+
+	if (DeathMontage)
+	{
+		FTimerHandle DeathTimerHandle;
+		float Duration = PlayAnimMontage(DeathMontage);
+		if (Duration > 0.0f)
+		{
+			GetWorldTimerManager().SetTimer(
+				DeathTimerHandle,
+				[this]() {
+					this->Destroy();
+				},
+				Duration,
+				false
+			);
+		}
+		else
+		{
+			Destroy();
+		}
+	}
+	else
+	{
+		Destroy();
+	}
+}
+
+
+void AShooterCharacter::DeathPlaySound()
+{
+	if (!DeathSound)	return;
+
+	if (DeathSound->IsPlayable())
+	{
+		UGameplayStatics::PlaySound2D(this, DeathSound);
+	}
 }
 

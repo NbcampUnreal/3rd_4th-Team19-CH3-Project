@@ -14,6 +14,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
 class UStatCalculater;
+class USoundCue;
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver
@@ -36,6 +37,10 @@ public:
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> FireMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	TObjectPtr<USoundCue> DeathSound;
 
 protected:
 	virtual void BeginPlay() override;
@@ -80,6 +85,9 @@ public:
 	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
 	void OnDeath();
+	void DeathPlaySound();
+
+	bool bDie = false;
 
 private:
 
