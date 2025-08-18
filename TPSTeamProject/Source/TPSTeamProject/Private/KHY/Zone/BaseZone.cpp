@@ -41,7 +41,11 @@ void ABaseZone::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 
 void ABaseZone::ExecuteTriggerAction(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
+	if (OtherActor->IsA(ACharacter::StaticClass()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName());
+	}
+
 }
 
 
