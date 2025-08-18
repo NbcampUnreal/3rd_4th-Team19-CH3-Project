@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Manager/ObserverManager/Observer.h"
+#include "GenericTeamAgentInterface.h" 
 #include "ShooterCharacter.generated.h"
 
 struct FInputActionValue;
@@ -16,7 +17,7 @@ class UObjectTweenComponent;
 class UStatCalculater;
 
 UCLASS()
-class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver
+class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -79,6 +80,8 @@ public:
 
 	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
+
 	void OnDeath();
 
 private:
@@ -119,4 +122,6 @@ private:
 
 	FTimerHandle AutoShootTimerHandle;
 	FTimerHandle CloseContactTimerHandle;
+
+	FGenericTeamId TeamId = FGenericTeamId(2);
 };
