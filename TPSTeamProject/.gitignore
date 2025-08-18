@@ -93,4 +93,7 @@ Build/Android/res/*/*
 Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
 
+# DataTables
+Content/Data/DataTables/*
+
 # End of https://www.toptal.com/developers/gitignore/api/unrealengine
