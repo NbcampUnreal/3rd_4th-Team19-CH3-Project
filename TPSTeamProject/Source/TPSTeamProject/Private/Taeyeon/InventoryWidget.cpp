@@ -17,6 +17,7 @@ void UInventoryWidget::RefreshInventory(UInventoryComponent* InventoryComp)
         if (SlotWidget)
         {
             SlotWidget->UpdateSlot(SlotData, InventoryComp->GetItemDataTable());
+            SlotWidget->OnSlotRightClicked.AddDynamic(this, &UInventoryWidget::OnSlotRightClickHandler);
             WrapBox->AddChildToWrapBox(SlotWidget);
         }
     }
@@ -34,4 +35,9 @@ FReply UInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
         }
     }
     return FReply::Unhandled();
+}
+
+void UInventoryWidget::OnSlotRightClickHandler(const FInventorySlot& SlotData)
+{
+    OnItemUseRequested.Broadcast(SlotData);
 }

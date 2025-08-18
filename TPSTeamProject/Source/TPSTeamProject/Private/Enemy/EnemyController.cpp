@@ -15,9 +15,19 @@ AEnemyController::AEnemyController()
 	SetPerceptionComponent(*AIPerception);
 
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
+
+	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
+	SightConfig->SetMaxAge(5.0f);
 	AIPerception->ConfigureSense(*SightConfig);
 
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
+
+	HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
+	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	HearingConfig->DetectionByAffiliation.bDetectFriendlies = false;
+	HearingConfig->SetMaxAge(5.0);
 	AIPerception->ConfigureSense(*HearingConfig);
 
 	AIPerception->SetDominantSense(SightConfig->GetSenseImplementation());
@@ -28,6 +38,8 @@ AEnemyController::AEnemyController()
 void AEnemyController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetGenericTeamId((FGenericTeamId(1)));
 
 	if (AIPerception)
 	{
@@ -68,17 +80,11 @@ void AEnemyController::OnPossess(APawn* InPawn)
 			SightConfig->PeripheralVisionAngleDegrees = WalkerData->PeripheralVisionAngleDegress;
 			SightConfig->SetMaxAge(WalkerData->SightMaxAge);
 
-			SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-			SightConfig->DetectionByAffiliation.bDetectNeutrals = true; 
-			SightConfig->DetectionByAffiliation.bDetectFriendlies = false; 
-
 			HearingConfig->HearingRange = WalkerData->HearingRange;
 			HearingConfig->LoSHearingRange = WalkerData->LoSHearingRange;
 			HearingConfig->SetMaxAge(WalkerData->HearingMaxAge);
-
-			HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
-			HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;  
-			HearingConfig->DetectionByAffiliation.bDetectFriendlies = false; 
+			 
+			UE_LOG(LogTemp, Warning, TEXT("HearingRange: %f"), HearingConfig->HearingRange);
 
 			AIPerception->ConfigureSense(*SightConfig);
 			AIPerception->ConfigureSense(*HearingConfig);
@@ -144,6 +150,8 @@ void AEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 
 	if (Stimulus.Type == UAISense::GetSenseID(UAISense_Hearing::StaticClass()))
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("Hearing stimulus received!"));
+
 		if (Stimulus.WasSuccessfullySensed())
 		{
 			BlackboardComp->SetValueAsVector(TEXT("HeardLocation"), Stimulus.StimulusLocation);

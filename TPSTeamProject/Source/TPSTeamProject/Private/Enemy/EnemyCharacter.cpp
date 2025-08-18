@@ -5,6 +5,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TPSGameInstance.h"
 #include "Manager/GameInstanceSubsystem/DataTableManager.h"
+#include "Taeyeon/Item.h"
+#include "Taeyeon/ItemComponent.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -177,6 +179,8 @@ void AEnemyCharacter::OnDeath()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	DropItems();
+	
 	if (DeathMontage && GetMesh())
 	{
 		float Duration = PlayAnimMontage(DeathMontage);
@@ -203,4 +207,62 @@ void AEnemyCharacter::OnDeath()
 void AEnemyCharacter::OnDeathAnimationFinished()
 {
 	Destroy();
+}
+
+void AEnemyCharacter::DropItems()
+{
+	if (EnemyType == EEnemyType::Walker || (DropCoin == nullptr))
+	{
+		return;
+	}
+
+	const FVector SpawnLocation = GetActorLocation();
+	const FRotator SpawnRotation = GetActorRotation();
+	
+	if (DropCoin)
+	{
+		GetWorld()->SpawnActor<AItem>(DropCoin,
+			FVector(SpawnLocation.X, SpawnLocation.Y,(SpawnLocation.Z - 90.f)),
+			SpawnRotation);
+	}
+
+	DropAttachment();
+}
+
+void AEnemyCharacter::DropAttachment()
+{
+	if (!AttachmentLootTable || !CommonAttachmentItemClass)
+	{
+		return;
+	}
+
+	if (FMath::FRand() < AttachmentDropChance)
+	{
+		const TArray<FName> RowNames = AttachmentLootTable->GetRowNames();
+		if (RowNames.IsEmpty())
+		{
+			return;
+		}
+
+		const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() -1)];
+
+		FVector SpawnLocation = GetActorLocation();
+		FHitResult HitResult;
+		FVector StartLocation = GetActorLocation();
+		FVector EndLocation = StartLocation - FVector(0.f, 0.f, 500.f);
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+		{
+			SpawnLocation = HitResult.Location;
+		}
+
+		if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation, FRotator::ZeroRotator))
+		{
+			if (UItemComponent* ItemComp = SpawnedItem->FindComponentByClass<UItemComponent>())
+			{
+				ItemComp->SetItemName(RandomAttachmentName);
+			}
+		}
+	}
 }

@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Manager/ObserverManager/Observer.h"
+#include "GenericTeamAgentInterface.h" 
 #include "ShooterCharacter.generated.h"
 
+struct FInventorySlot;
 struct FInputActionValue;
 class UInventoryWidget;
 class UInventoryComponent;
@@ -16,7 +18,7 @@ class UObjectTweenComponent;
 class UStatCalculater;
 
 UCLASS()
-class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver
+class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -83,6 +85,8 @@ public:
 
 	virtual void OnEvent(EMessageType InMsgType, int32 InParam) override;
 
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
+
 	void OnDeath();
 
 private:
@@ -124,10 +128,14 @@ private:
 
 	UFUNCTION()
 	bool CanFire();
+	UFUNCTION()
+	void HandleItemUse(const FInventorySlot& SlotData);
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;
 
 	FTimerHandle AutoShootTimerHandle;
 	FTimerHandle CloseContactTimerHandle;
+
+	FGenericTeamId TeamId = FGenericTeamId(2);
 };

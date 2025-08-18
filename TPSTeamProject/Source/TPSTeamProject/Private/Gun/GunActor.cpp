@@ -25,6 +25,7 @@
 #include "Manager/ObserverManager/MessageType.h"
 #include "Perception/AISense_Hearing.h"
 #include "NiagaraFunctionLibrary.h"
+#include "drawdebughelpers.h"
 
 AGunActor::AGunActor()
 {
@@ -432,11 +433,31 @@ void AGunActor::PlayFireSound(bool IsExistAmmo)
 		UAISense_Hearing::ReportNoiseEvent(
 			GetWorld(),
 			GetActorLocation(),
-			3.0f,
+			50.0f,
 			GetOwner(),
 			0.0f,
 			FName("Gunshot")
 		);
+
+		//DrawDebugSphere(
+		//	GetWorld(),
+		//	FirePoint->GetComponentLocation(),
+		//	30.0f,
+		//	12,
+		//	FColor::Red,
+		//	false,
+		//	5.0f
+		//);
+
+		//DrawDebugSphere(
+		//	GetWorld(),
+		//	GetActorLocation(),
+		//	30.0f,
+		//	12,
+		//	FColor::Green,
+		//	false,
+		//	5.0f
+		//);
 	}
 }
 

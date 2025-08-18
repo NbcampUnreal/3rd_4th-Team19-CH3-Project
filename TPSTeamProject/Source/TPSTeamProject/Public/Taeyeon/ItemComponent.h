@@ -18,8 +18,10 @@ protected:
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	virtual void Interact(AActor* Interactor) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void SetItemName(const FName NewItemName) { ItemName = NewItemName; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
