@@ -552,7 +552,8 @@ void AShooterCharacter::HandleItemUse(const FInventorySlot& SlotData)
 	{
 		return;
 	}
-	
+
+	InventoryComp->RemoveItem(SlotData.ItemName, 1);
 }
 
 float AShooterCharacter::TakeDamage(

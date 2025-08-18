@@ -72,4 +72,34 @@ bool UInventoryComponent::AddItem(FName ItemName, int32 Amount)
 
 void UInventoryComponent::RemoveItem(FName ItemName, int32 Amount)
 {
+	if (ItemName.IsNone() || Amount <= 0)
+	{
+		return;
+	}
+
+	int32 RemoveAmount = Amount;
+
+	for (int32 i = Inventory.Num() - 1; i >= 0; --i)
+	{
+		if (Inventory[i].ItemName == ItemName)
+		{
+			const int32 RealRemoveAmount = FMath::Min(Inventory[i].Amount, RemoveAmount);
+
+			Inventory[i].Amount -= RealRemoveAmount;
+			RemoveAmount -= RealRemoveAmount;
+
+			if (Inventory[i].Amount <= 0)
+			{
+				Inventory[i].ItemName = NAME_None;
+				Inventory[i].Amount = 0;
+			}
+
+			if (RemoveAmount <= 0) break;
+		}
+	}
+
+	if (RemoveAmount < Amount)
+	{
+		OnInventoryUpdated.Broadcast();
+	}
 }
