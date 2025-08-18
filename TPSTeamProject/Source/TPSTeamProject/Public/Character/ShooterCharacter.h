@@ -36,6 +36,8 @@ public:
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> FireMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> ReloadMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,14 +45,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveValue")
 	float InputDirectionAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsShoot;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsAuto;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsZoom;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsCloseContact;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	bool bIsReload;
 	UPROPERTY()
 	TArray<TObjectPtr<UStatCalculater>> StatCalculaters;
 
@@ -62,7 +66,7 @@ protected:
 	TObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> InventoryComp;
-	
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -113,6 +117,13 @@ private:
 	void Interaction();
 	UFUNCTION()
 	void OnInventoryUpdated();
+	UFUNCTION()
+	void Reload();
+	UFUNCTION()
+	void ReloadFinished();
+
+	UFUNCTION()
+	bool CanFire();
 
 	FTimerDelegate ShootDelegate;
 	FTimerDelegate CloseContactDelegate;

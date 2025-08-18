@@ -24,6 +24,7 @@
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
 #include "Perception/AISense_Hearing.h"
+#include "NiagaraFunctionLibrary.h"
 
 AGunActor::AGunActor()
 {
@@ -62,6 +63,8 @@ AGunActor::AGunActor()
 	ScopeComp->SetupAttachment(HullComp);
 	MountMagComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MountMag"));
 	MountMagComp->SetupAttachment(HullComp);
+	ShellEjectPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ShellEjectPoint"));
+	ShellEjectPoint->SetupAttachment(HullComp);
 
 	MagComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mag"));
 	MagComp->SetupAttachment(MountMagComp);
@@ -99,105 +102,142 @@ void AGunActor::BeginPlay()
 	}
 }
 
-void AGunActor::Fire()
+bool AGunActor::Fire()
 {
 	if (IsValid(CameraManager) == false)
 	{
-		return;
+		return false;
 	}
 
-	AActor* CurrentCameraActor = CameraManager->GetViewTarget();
-	UCameraComponent* CurrentCameraComp = CurrentCameraActor->FindComponentByClass<UCameraComponent>();
-
-	const FVector& FireStartPointLocation = CurrentCameraComp->GetComponentLocation();
-	const FRotator& CurrentCameraRotater = CurrentCameraComp->GetComponentRotation();
-	const FVector& FireEndPointLocation = FireStartPointLocation + CurrentCameraRotater.Quaternion().GetForwardVector() * FireRange;
-
-	bool bHit = false;
-	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+	bool bCanFire = IsExistAmmo();
+	if (bCanFire)
 	{
-		int32 ViewportSizeX, ViewportSizeY;
-		PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+		CurrentAmmoCount--;
 
-		FVector2D ScreenCenter = FVector2D(ViewportSizeX / 2, ViewportSizeY / 2);
+		AActor* CurrentCameraActor = CameraManager->GetViewTarget();
+		UCameraComponent* CurrentCameraComp = CurrentCameraActor->FindComponentByClass<UCameraComponent>();
 
-		FVector StartLocation;
-		FVector Direction;
-		PlayerController->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, StartLocation, Direction);
+		const FVector& FireStartPointLocation = CurrentCameraComp->GetComponentLocation();
+		const FRotator& CurrentCameraRotater = CurrentCameraComp->GetComponentRotation();
+		const FVector& FireEndPointLocation = FireStartPointLocation + CurrentCameraRotater.Quaternion().GetForwardVector() * FireRange;
 
-		FVector EndLocation = StartLocation + Direction * 5000.f;
-
-		bHit = GetWorld()->LineTraceSingleByChannel(
-			HitResult,
-			StartLocation,
-			EndLocation,
-			ECollisionChannel::ECC_Visibility,
-			Params
-		);
-
-		//DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
-	}
-
-	UMaterialInterface* BulletDecal = nullptr;
-	float DecalLifeSpan = 0.f;
-	if (bHit)
-	{
-		AActor* HitActor = HitResult.GetActor();
-
-		UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %d"), *HitActor->GetName(), StatCalculater->GetAtkDamage());
-
-		if (HitActor->IsA<APawn>())
+		bool bHit = false;
+		if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 		{
-			float Damage = StatCalculater->GetAtkDamage();
+			int32 ViewportSizeX, ViewportSizeY;
+			PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
 
-			FName HitBoneName = HitResult.BoneName;
-			UE_LOG(LogTemp, Warning, TEXT("Hit BoneName: %s"), *HitBoneName.ToString());
-			if (HitBoneName == HitBone_Head)
+			FVector2D ScreenCenter = FVector2D(ViewportSizeX / 2, ViewportSizeY / 2);
+
+			FVector StartLocation;
+			FVector Direction;
+			PlayerController->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, StartLocation, Direction);
+
+			FVector EndLocation = StartLocation + Direction * 5000.f;
+
+			bHit = GetWorld()->LineTraceSingleByChannel(
+				HitResult,
+				StartLocation,
+				EndLocation,
+				ECollisionChannel::ECC_Visibility,
+				Params
+			);
+
+			//DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, true, 10.f);
+		}
+
+		UNiagaraSystem* BulletNiagara = nullptr;
+		float DecalLifeSpan = 0.f;
+		if (bHit)
+		{
+			AActor* HitActor = HitResult.GetActor();
+
+			UE_LOG(LogTemp, Log, TEXT("Actor Name : %s, Damage : %d"), *HitActor->GetName(), StatCalculater->GetAtkDamage());
+
+			if (HitActor->IsA<APawn>())
 			{
-				Damage *= 1.5f;
+				float Damage = StatCalculater->GetAtkDamage();
+
+				FName HitBoneName = HitResult.BoneName;
+				UE_LOG(LogTemp, Warning, TEXT("Hit BoneName: %s"), *HitBoneName.ToString());
+				if (HitBoneName == HitBone_Head)
+				{
+					Damage *= 1.5f;
+				}
+				else
+				{
+					Damage *= 1.0f;
+				}
+
+				UGameplayStatics::ApplyPointDamage(
+					HitActor,
+					Damage,
+					HitResult.TraceEnd - HitResult.TraceStart,
+					HitResult,
+					GetOwner()->GetInstigatorController(),
+					this,
+					nullptr
+				);
+
+				BulletNiagara = EnemyHitEffect;
+				DecalLifeSpan = 0.5f;
 			}
 			else
 			{
-				Damage *= 1.0f;
+				BulletNiagara = NonEnemyHitEffect;
+				DecalLifeSpan = 5.f;
 			}
 
-			UGameplayStatics::ApplyPointDamage(
-				HitActor,
-				Damage,
-				HitResult.TraceEnd - HitResult.TraceStart,
-				HitResult,
-				GetOwner()->GetInstigatorController(),
-				this,
-				nullptr
-			);
-
-			BulletDecal = EnemyHitParticle;
-			DecalLifeSpan = 0.5f;
-		}
-		else
-		{
-			BulletDecal = NonEnemyHitParticle;
-			DecalLifeSpan = 5.f;
+			if (BulletNiagara)
+			{
+				/*FRotator DecalRotation = (-HitResult.ImpactNormal).Rotation();*/
+				
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+					this,
+					BulletNiagara,
+					HitResult.Location,
+					FRotator::ZeroRotator,
+					FVector(1.0f)
+				);
+			}
 		}
 
-		if (BulletDecal)
-		{
-			FRotator DecalRotation = (-HitResult.ImpactNormal).Rotation();
-			UGameplayStatics::SpawnDecalAtLocation(
-				this,
-				BulletDecal,
-				FVector(16.f, 16.f, 16.f),
-				HitResult.Location,
-				DecalRotation,
-				DecalLifeSpan
-			);
-		}
+		UGameplayStatics::SpawnDecalAtLocation(
+			this,
+			FireTrace,
+			FVector(16.f, 16.f, 16.f),
+			FirePoint->GetComponentLocation(),
+			FRotator::ZeroRotator,
+			0.5f
+		);
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			FireEffect,
+			FirePoint->GetComponentLocation(),
+			FRotator::ZeroRotator,
+			FVector(1.0f)
+		);
+
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			ShellEjectEffect,
+			ShellEjectPoint->GetComponentLocation(),
+			FRotator::ZeroRotator,
+			FVector(1.0f)
+		);
+
+		//ShootFireTweenComp->PlayFromStart();
+		//ShootFireParticleTweenComp->PlayFromStart();
 	}
+	/*else
+	{
 
-	ShootFireTweenComp->PlayFromStart();
-	ShootFireParticleTweenComp->PlayFromStart();
+	}*/
 
-	PlayFireSound();
+	PlayFireSound(bCanFire);
+
+	return bCanFire;
 }
 
 UCameraComponent* AGunActor::GetScopeCameraComp() const
@@ -216,11 +256,23 @@ void AGunActor::ChangeParts(int32 Index, EAttachmentSlot InType)
 	EquipPartsMap[InType]->ChangeItem(Index);
 
 	StatCalculater->UpdateStat();
+
+	UpdateMaxAmmoCount();
+}
+
+void AGunActor::Reload()
+{
+	CurrentAmmoCount = MaxAmmoCount;
 }
 
 UStatCalculater* AGunActor::GetStatCalculater() const
 {
 	return StatCalculater;
+}
+
+bool AGunActor::IsExistAmmo() const
+{
+	return CurrentAmmoCount > 0;
 }
 
 void AGunActor::OnFireLight()
@@ -288,6 +340,9 @@ void AGunActor::InitializeAttachment()
 
 		ObserverManager->SendEvent(EMessageType::UpdateStat, -1);
 	}
+
+	CurrentAmmoCount =  StatCalculater->GetMaxAmmoCount();
+	UpdateMaxAmmoCount();
 }
 
 void AGunActor::SetMeshToScope()
@@ -348,13 +403,29 @@ void AGunActor::ApplyPaintTextureToScope()
 
 }
 
-void AGunActor::PlayFireSound()
+void AGunActor::PlayFireSound(bool IsExistAmmo)
 {
-	if (FireBulletSound)
+	USoundBase* PlaySoundBase = nullptr;
+	if (IsExistAmmo == false)
+	{
+		if (EmptyAmmoSound)
+		{
+			PlaySoundBase = EmptyAmmoSound;
+		}
+	}
+	else
+	{
+		if (FireBulletSound)
+		{
+			PlaySoundBase = FireBulletSound;
+		}
+	}
+
+	if (PlaySoundBase)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
 			GetWorld(),
-			FireBulletSound,
+			PlaySoundBase,
 			FirePoint->GetComponentLocation()
 		);
 
@@ -372,5 +443,10 @@ void AGunActor::PlayFireSound()
 void AGunActor::UpdateShooterStat()
 {
 	
+}
+
+void AGunActor::UpdateMaxAmmoCount()
+{
+	MaxAmmoCount = StatCalculater->GetMaxAmmoCount();
 }
 

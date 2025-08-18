@@ -63,9 +63,11 @@ void AShooterCharacter::BeginPlay()
 			return;
 		}
 
-		GunActor->Fire();
+		CanFire();
 
-		double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+		//GunActor->Fire();
+
+		/*double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
 		double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
 
 		AddControllerYawInput(RecoilYaw);
@@ -77,7 +79,7 @@ void AShooterCharacter::BeginPlay()
 			{
 				AnimInstance->Montage_Play(FireMontage);
 			}
-		}
+		}*/
 	});
 
 	CloseContactDelegate.BindLambda([this]()
@@ -250,6 +252,16 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					&AShooterCharacter::ToggleInventory
 				);
 			}
+
+			ensure(PlayerController->ReloadAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->ReloadAction,
+					ETriggerEvent::Started,
+					this,
+					&AShooterCharacter::Reload
+				);
+			}
 		}
 	}
 }
@@ -278,7 +290,7 @@ void AShooterCharacter::Look(const FInputActionValue& value)
 	FVector2D LookInput = value.Get<FVector2D>();
 
 	AddControllerYawInput(LookInput.X);
-	AddControllerPitchInput(LookInput.Y);
+	AddControllerPitchInput(-LookInput.Y);
 }
 
 void AShooterCharacter::StartJump(const FInputActionValue& value)
@@ -305,27 +317,18 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 		return;
 	}*/
 
+	if (bIsReload)
+	{
+		return;
+	}
+
 	if (bIsAuto == false)
 	{
 		if (bIsShoot == false)
 		{
 			bIsShoot = true;
 
-			GunActor->Fire();
-
-			double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
-			double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
-
-			AddControllerYawInput(RecoilYaw);
-			AddControllerPitchInput(RecoilPitch);
-
-			if (FireMontage)
-			{
-				if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-				{
-					AnimInstance->Montage_Play(FireMontage);
-				}
-			}
+			CanFire();
 		}
 
 		return;
@@ -348,11 +351,10 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 
 void AShooterCharacter::StopShooting(const FInputActionValue& value)
 {
-	/*bool bShootTrigger = value.Get<bool>();
-	if (bShootTrigger == false)
+	if (bIsReload)
 	{
 		return;
-	}*/
+	}
 
 	bIsShoot = false;
 
@@ -543,6 +545,62 @@ void AShooterCharacter::OnInventoryUpdated()
 	{
 		InventoryWidget->RefreshInventory(InventoryComp);
 	}
+}
+
+void AShooterCharacter::Reload()
+{
+	if (bIsShoot || bIsZoom || bIsCloseContact)
+	{
+		return;
+	}
+
+	bIsReload = true;
+
+	if (ReloadMontage)
+	{
+		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+		}
+	}
+}
+
+void AShooterCharacter::ReloadFinished()
+{
+	if (bIsShoot || bIsZoom || bIsCloseContact)
+	{
+		return;
+	}
+
+	bIsReload = false;
+}
+
+bool AShooterCharacter::CanFire()
+{
+	if (IsValid(GunActor) == false)
+	{
+		return false;
+	}
+
+	bool bCanFire = GunActor->Fire();
+	if (bCanFire)
+	{
+		double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+		double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
+
+		AddControllerYawInput(RecoilYaw);
+		AddControllerPitchInput(RecoilPitch);
+
+		if (FireMontage)
+		{
+			if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+			{
+				AnimInstance->Montage_Play(FireMontage);
+			}
+		}
+	}
+
+	return bCanFire;
 }
 
 float AShooterCharacter::TakeDamage(
