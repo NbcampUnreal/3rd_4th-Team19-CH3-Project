@@ -14,11 +14,6 @@ ABaseZone::ABaseZone()
 	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ABaseZone::OnOverlapEnd);
 }
 
-void ABaseZone::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
 void ABaseZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -46,7 +41,11 @@ void ABaseZone::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 
 void ABaseZone::ExecuteTriggerAction(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
+	if (OtherActor->IsA(ACharacter::StaticClass()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *GetName());
+	}
+
 }
 
 

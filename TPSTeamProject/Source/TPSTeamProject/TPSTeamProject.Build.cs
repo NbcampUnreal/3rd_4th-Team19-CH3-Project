@@ -17,7 +17,7 @@ public class TPSTeamProject : ModuleRules
 			"AIModule",
 			"NavigationSystem",
 			"GameplayTasks",
-			"UMG",
+            "UMG",
             "Niagara"
         });
 		
