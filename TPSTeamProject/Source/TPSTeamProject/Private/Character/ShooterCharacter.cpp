@@ -18,6 +18,7 @@
 #include "Sound/SoundCue.h"
 #include "UI/CrosshairComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "UI/GameOverWidget.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -733,6 +734,7 @@ void AShooterCharacter::OnDeath()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	ShowGameOverScreen();
 
 	if (DeathSound)
 	{
@@ -808,5 +810,34 @@ void AShooterCharacter::RemoveDamageWidgetInstance()
 	{
 		DamageWidgetInstance->RemoveFromParent();
 		DamageWidgetInstance = nullptr;
+	}
+}
+
+void AShooterCharacter::ShowGameOverScreen()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController) return;
+
+	if (GameOverWidgetInstance)
+	{
+		HideGameOverScreen();
+	}
+
+	GameOverWidgetInstance = CreateWidget<UGameOverWidget>(PlayerController, GameOverWidgetClass);
+
+	if (GameOverWidgetInstance)
+	{
+		GameOverWidgetInstance->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->SetInputMode(FInputModeUIOnly());
+	}
+}
+
+void AShooterCharacter::HideGameOverScreen()
+{
+	if (GameOverWidgetInstance)
+	{
+		GameOverWidgetInstance->RemoveFromParent();
+		GameOverWidgetInstance = nullptr;
 	}
 }

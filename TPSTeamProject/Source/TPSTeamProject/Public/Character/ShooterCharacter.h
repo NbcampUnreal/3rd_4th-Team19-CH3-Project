@@ -18,6 +18,8 @@ class UObjectTweenComponent;
 class UStatCalculater;
 class USoundCue;
 class UCrosshairComponent;
+class UGameOverWidget;
+
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
@@ -49,6 +51,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
 	TObjectPtr<UCrosshairComponent> CrosshairComp;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UGameOverWidget> GameOverWidgetClass;
+	UPROPERTY()
+	UGameOverWidget* GameOverWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsShoot;
@@ -119,6 +126,9 @@ public:
 	void PlaySoundDeath();
 	UFUNCTION()
 	void PlayAnimationDeath();
+
+	void ShowGameOverScreen();
+	void HideGameOverScreen();
 
 private:
 
