@@ -27,18 +27,11 @@ void ACloakerCharacter::BeginPlay()
 	SetTranslucent(true);
 }
 
-float ACloakerCharacter::TakeDamage(
-	float DamageAmount,
-	struct FDamageEvent const& DamageEvent,
-	AController* EventInstigator,
-	AActor* DamageCauser)
+void ACloakerCharacter::OnDeath()
 {
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	bTakedDamage = true;
 	SetTranslucent(false);
 
-	return ActualDamage;
+	Super::OnDeath();
 }
 
 void ACloakerCharacter::OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -76,10 +69,7 @@ void ACloakerCharacter::SetTranslucent(bool bTransluncent)
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	if (!MeshComp) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("OriginalMaterials.Num()=%d, Mesh.NumMaterials()=%d"),
-		OriginalMaterials.Num(), MeshComp->GetNumMaterials());
-
-	if (bTransluncent && TranslucentMaterial && !bTakedDamage)
+	if (bTransluncent && TranslucentMaterial)
 	{
 		for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
 		{
@@ -90,7 +80,6 @@ void ACloakerCharacter::SetTranslucent(bool bTransluncent)
 	{
 		for (int32 i = 0; i < OriginalMaterials.Num(); i++)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Slot %d: %s"), i, *OriginalMaterials[i]->GetName());
 			MeshComp->SetMaterial(i, OriginalMaterials[i]);
 		}
 	}

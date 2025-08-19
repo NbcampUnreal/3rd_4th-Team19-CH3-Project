@@ -19,7 +19,10 @@ void AScreamerCharacter::Scream()
 
 	FVector ScreamerLocation = GetActorLocation();
 
-	for (int32 i = 0; i < SpawnCount; ++i)
+	int32 LoopCount = SpawnCount;
+	int32 MaxAttempts = SpawnCount * 10;
+
+	while(LoopCount>0 && MaxAttempts>0)
 	{
 		FNavLocation RandomLocation;
 		bool bFound = NavSystem->GetRandomReachablePointInRadius(
@@ -35,7 +38,13 @@ void AScreamerCharacter::Scream()
 			FVector DirectionToScreamer = (ScreamerLocation - SpawnLoc).GetSafeNormal();
 			FRotator SpawnRot = DirectionToScreamer.Rotation();
 
-			GetWorld()->SpawnActor<AWalkerCharacter>(EnemyToSpawnClass, SpawnLoc, SpawnRot);
+			AWalkerCharacter* SpawnedActor = GetWorld()->SpawnActor<AWalkerCharacter>(EnemyToSpawnClass, SpawnLoc, SpawnRot);
+			if (SpawnedActor)
+			{
+				LoopCount--;
+			}
 		}
+
+		MaxAttempts--;
 	}
 }
