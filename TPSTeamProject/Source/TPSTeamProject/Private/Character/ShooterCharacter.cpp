@@ -16,6 +16,7 @@
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
 #include "Sound/SoundCue.h"
+#include "UI/CrosshairComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -33,9 +34,13 @@ AShooterCharacter::AShooterCharacter()
 	ZoomTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ZoomTween"));
 	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 
+	CrosshairComp = CreateDefaultSubobject<UCrosshairComponent>(TEXT("CrosshairComp"));
+
 	bIsZoom = false;
 	bIsAuto = false;
 	bIsCloseContact = false;
+
+	SprintSpeed = 1.f;
 }
 
 void AShooterCharacter::BeginPlay()
@@ -264,6 +269,23 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					&AShooterCharacter::Reload
 				);
 			}
+
+			ensure(PlayerController->SprintAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Started,
+					this,
+					&AShooterCharacter::OnSprint
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Completed,
+					this,
+					&AShooterCharacter::OffSprint
+				);
+			}
 		}
 	}
 }
@@ -278,12 +300,16 @@ void AShooterCharacter::Move(const FInputActionValue& value)
 
 	if (FMath::IsNearlyZero(Direction.X) == false)
 	{
-		AddMovementInput(GetActorForwardVector() * Direction.X, 5.f);
+		AddMovementInput(GetActorForwardVector() * Direction.X * SprintSpeed, 5.f * SprintSpeed);
+
+		UE_LOG(LogTemp, Log, TEXT("SpeedX : %lf"), GetVelocity().X);
 	}
 
 	if (FMath::IsNearlyZero(Direction.Y) == false)
 	{
-		AddMovementInput(GetActorRightVector() * Direction.Y, 5.f);
+		AddMovementInput(GetActorRightVector() * Direction.Y * SprintSpeed, 5.f * SprintSpeed);
+
+		UE_LOG(LogTemp, Log, TEXT("SpeedY : %lf"), GetVelocity().Y);
 	}
 }
 
@@ -444,6 +470,8 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(GunActor, 0.1f);
 
+			CrosshairComp->SetActive(false);
+
 			bIsZoom = true;
 		}
 		else
@@ -453,6 +481,8 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 			ensure(PlayerController);
 
 			PlayerController->SetViewTargetWithBlend(this, 0.1f);
+
+			CrosshairComp->SetActive(true);
 
 			bIsZoom = false;
 		}
@@ -575,6 +605,18 @@ void AShooterCharacter::ReloadFinished()
 	}
 
 	bIsReload = false;
+}
+
+void AShooterCharacter::OnSprint()
+{
+	SprintSpeed = 500000.f;
+
+	UE_LOG(LogTemp, Log, TEXT("Sprint"));
+}
+
+void AShooterCharacter::OffSprint()
+{
+	SprintSpeed = 1.f;
 }
 
 bool AShooterCharacter::CanFire()

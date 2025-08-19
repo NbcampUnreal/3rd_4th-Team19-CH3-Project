@@ -17,6 +17,7 @@ class UCameraComponent;
 class UObjectTweenComponent;
 class UStatCalculater;
 class USoundCue;
+class UCrosshairComponent;
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
@@ -28,7 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun")
 	TSubclassOf<class AGunActor> GunClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
 	TObjectPtr<class AGunActor> GunActor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -46,14 +47,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	TObjectPtr<USoundCue> DeathSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	TObjectPtr<UCrosshairComponent> CrosshairComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	bool bIsShoot;
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveValue")
 	float InputDirectionAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
-	bool bIsShoot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsAuto;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
@@ -101,6 +106,9 @@ public:
 
 private:
 
+	UPROPERTY()
+	float SprintSpeed;
+
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
 	UFUNCTION()
@@ -135,6 +143,10 @@ private:
 	void Reload();
 	UFUNCTION()
 	void ReloadFinished();
+	UFUNCTION()
+	void OnSprint();
+	UFUNCTION()
+	void OffSprint();
 
 	UFUNCTION()
 	bool CanFire();
