@@ -17,6 +17,7 @@
 #include "Manager/ObserverManager/MessageType.h"
 #include "Sound/SoundCue.h"
 #include "UI/CrosshairComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -40,7 +41,10 @@ AShooterCharacter::AShooterCharacter()
 	bIsAuto = false;
 	bIsCloseContact = false;
 
-	SprintSpeed = 1.f;
+	NormalSpeed = 600.0f;
+	SprintSpeed = NormalSpeed * 2;
+	
+	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 }
 
 void AShooterCharacter::BeginPlay()
@@ -300,15 +304,15 @@ void AShooterCharacter::Move(const FInputActionValue& value)
 
 	if (FMath::IsNearlyZero(Direction.X) == false)
 	{
-		AddMovementInput(GetActorForwardVector() * Direction.X * SprintSpeed, 5.f * SprintSpeed);
-
+		//AddMovementInput(GetActorForwardVector() * Direction.X * SprintSpeed, 5.f * SprintSpeed);
+		AddMovementInput(GetActorForwardVector() * Direction.X);
 		UE_LOG(LogTemp, Log, TEXT("SpeedX : %lf"), GetVelocity().X);
 	}
 
 	if (FMath::IsNearlyZero(Direction.Y) == false)
 	{
-		AddMovementInput(GetActorRightVector() * Direction.Y * SprintSpeed, 5.f * SprintSpeed);
-
+		//AddMovementInput(GetActorRightVector() * Direction.Y * SprintSpeed, 5.f * SprintSpeed);
+		AddMovementInput(GetActorRightVector() * Direction.Y);
 		UE_LOG(LogTemp, Log, TEXT("SpeedY : %lf"), GetVelocity().Y);
 	}
 }
@@ -609,14 +613,24 @@ void AShooterCharacter::ReloadFinished()
 
 void AShooterCharacter::OnSprint()
 {
-	SprintSpeed = 500000.f;
+	//SprintSpeed = 500000.f;
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("Sprint"));
 }
 
 void AShooterCharacter::OffSprint()
 {
-	SprintSpeed = 1.f;
+	//SprintSpeed = 1.f;
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
+	}
 }
 
 bool AShooterCharacter::CanFire()
