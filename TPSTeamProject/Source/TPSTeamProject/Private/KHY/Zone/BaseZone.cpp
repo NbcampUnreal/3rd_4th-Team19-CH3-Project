@@ -18,8 +18,6 @@ ABaseZone::ABaseZone()
 
 	OpenDoorTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("OpenDoorTween"));
 	CloseDoorTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("CloseDoorTween"));
-
-	ZoneChecker = NewObject<UZoneChecker>();
 }
 
 void ABaseZone::DoorOpen()
@@ -34,6 +32,7 @@ void ABaseZone::DoorClose()
 
 void ABaseZone::Initialize(int32 InNormalCount, int32 InSpecialCount)
 {
+	ZoneChecker = NewObject<UZoneChecker>();
 	ZoneChecker->Initialize(InNormalCount, InSpecialCount);
 }
 
