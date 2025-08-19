@@ -1,2 +1,2 @@
 Name,Type,ProjectileInitialSpeed,ProjectileMaxSpeed,ProjectileGravityScale,PoolDamagePerTick,PoolDamageInterval,PoolLifeDuration
-SpitterSkill,SpitterSkill,1500,1500,1,10,1,8
+SpitterSkill,SpitterSkill,2000,2000,1,10,1,8
