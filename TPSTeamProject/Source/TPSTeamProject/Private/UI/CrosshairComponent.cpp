@@ -31,6 +31,11 @@ void UCrosshairComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 }
 
 
+void UCrosshairComponent::VisibleCrosshair(bool bIsVisible)
+{
+    CrosshairWidget->VisibleCrosshair(bIsVisible);
+}
+
 void UCrosshairComponent::UpdateCrosshair(float DeltaTime)
 {
     if (!CrosshairWidget)

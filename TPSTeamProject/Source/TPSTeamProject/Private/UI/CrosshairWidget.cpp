@@ -14,3 +14,18 @@ void UCrosshairWidget::UpdateCrosshairSize(const float Speed)
 	LineLeft->SetRenderTranslation(FVector2D(-Offset, 0));
 	LineRight->SetRenderTranslation(FVector2D(Offset, 0));
 }
+
+void UCrosshairWidget::VisibleCrosshair(bool bIsVisible)
+{
+	ESlateVisibility VisibilityType = ESlateVisibility::Visible;
+	if (bIsVisible == false)
+	{
+		VisibilityType = ESlateVisibility::Hidden;
+	}
+
+	W_Dot->SetVisibility(VisibilityType);
+	LineTop->SetVisibility(VisibilityType);
+	LineBottom->SetVisibility(VisibilityType);
+	LineLeft->SetVisibility(VisibilityType);
+	LineRight->SetVisibility(VisibilityType);
+}

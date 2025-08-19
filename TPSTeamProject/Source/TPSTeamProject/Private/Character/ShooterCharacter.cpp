@@ -52,6 +52,7 @@ void AShooterCharacter::AddStatCalculater(UStatCalculater* InCalculater)
 	StatCalculaters.Add(InCalculater);
 }
 
+
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -486,7 +487,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(GunActor, 0.1f);
 
-			CrosshairComp->SetActive(false);
+			CrosshairComp->VisibleCrosshair(false);
 
 			bIsZoom = true;
 		}
@@ -498,7 +499,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(this, 0.1f);
 
-			CrosshairComp->SetActive(true);
+			CrosshairComp->VisibleCrosshair(true);
 
 			bIsZoom = false;
 		}
@@ -557,7 +558,7 @@ void AShooterCharacter::Interaction()
 		UEngineTypes::ConvertToTraceType(ECC_Visibility),
 		false,
 		{this},
-		EDrawDebugTrace::ForDuration,
+		EDrawDebugTrace::None,
 		OutHits,
 		true
 	);
@@ -692,7 +693,9 @@ float AShooterCharacter::TakeDamage(
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	CurrentHP -= ActualDamage;
-	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, MaxHP);
+	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, CurrentHP);
+
+	ShowDamage();
 
 	if (CurrentHP <= 0.0f)
 	{
@@ -779,3 +782,31 @@ void AShooterCharacter::PlayAnimationDeath()
 	}
 }
 
+void AShooterCharacter::ShowDamage()
+{
+	RemoveDamageWidgetInstance();
+	if (DamageWidgetClass)
+	{
+		DamageWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), DamageWidgetClass);
+		if (DamageWidgetInstance)
+		{
+			DamageWidgetInstance->AddToViewport();
+			UFunction* DamageAnimFunc = DamageWidgetInstance->FindFunction(FName("DamageAnim"));
+			if (DamageAnimFunc)
+			{
+				DamageWidgetInstance->ProcessEvent(DamageAnimFunc, nullptr);
+				GetWorldTimerManager().ClearTimer(DamageAnimTimerHandle);
+				GetWorld()->GetTimerManager().SetTimer(DamageAnimTimerHandle, this, &AShooterCharacter::RemoveDamageWidgetInstance, 1, false);
+			}
+		}
+	}
+}
+
+void AShooterCharacter::RemoveDamageWidgetInstance()
+{
+	if (DamageWidgetInstance)
+	{
+		DamageWidgetInstance->RemoveFromParent();
+		DamageWidgetInstance = nullptr;
+	}
+}

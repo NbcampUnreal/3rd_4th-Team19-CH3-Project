@@ -108,7 +108,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	TObjectPtr<UNiagaraSystem> ShellEjectEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	TObjectPtr<UMaterialInterface> FireTrace;
+	TObjectPtr<UMaterialInterface> NonEnemyHitBulletEffect;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();
