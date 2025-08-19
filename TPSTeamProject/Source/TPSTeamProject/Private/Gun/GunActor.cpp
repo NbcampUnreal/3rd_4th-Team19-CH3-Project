@@ -207,11 +207,11 @@ bool AGunActor::Fire()
 
 		UGameplayStatics::SpawnDecalAtLocation(
 			this,
-			FireTrace,
+			NonEnemyHitBulletEffect,
 			FVector(16.f, 16.f, 16.f),
-			FirePoint->GetComponentLocation(),
-			FRotator::ZeroRotator,
-			0.5f
+			HitResult.Location,
+			(-HitResult.ImpactPoint).Rotation(),
+			5.0f
 		);
 
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(

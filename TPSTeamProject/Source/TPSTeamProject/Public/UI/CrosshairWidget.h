@@ -12,6 +12,8 @@ class TPSTEAMPROJECT_API UCrosshairWidget : public UUserWidget
 
 public:
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UUserWidget> W_Dot;
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> LineTop;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> LineBottom;
@@ -22,5 +24,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
 	void UpdateCrosshairSize(const float Speed);
+	UFUNCTION(BlueprintCallable, Category = "Crosshair")
+	void VisibleCrosshair(bool bIsVisible);
 	
 };

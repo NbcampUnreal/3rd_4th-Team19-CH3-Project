@@ -215,11 +215,11 @@ void AEnemyCharacter::OnDeath()
 		{
 			ObserverManager->SendEvent(EMessageType::KillSpecial, 1);
 		}
-		else if (EnemyType == EEnemyType::Spitter)
+		else if (EnemyType == EEnemyType::Cloaker)
 		{
 			ObserverManager->SendEvent(EMessageType::KillSpecial, 2);
 		}
-		else if (EnemyType == EEnemyType::Cloaker)
+		else if (EnemyType == EEnemyType::Spitter)
 		{
 			ObserverManager->SendEvent(EMessageType::KillSpecial, 3);
 		}

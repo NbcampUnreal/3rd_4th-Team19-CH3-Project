@@ -29,6 +29,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UCrosshairWidget> CrosshairWidgetClass;
 
+	UFUNCTION()
+	void VisibleCrosshair(bool bIsVisible);
+
 
 private:
 	void UpdateCrosshair(float DeltaTime);

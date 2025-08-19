@@ -487,7 +487,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(GunActor, 0.1f);
 
-			CrosshairComp->SetActive(false);
+			CrosshairComp->VisibleCrosshair(false);
 
 			bIsZoom = true;
 		}
@@ -499,7 +499,7 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(this, 0.1f);
 
-			CrosshairComp->SetActive(true);
+			CrosshairComp->VisibleCrosshair(true);
 
 			bIsZoom = false;
 		}
@@ -693,7 +693,7 @@ float AShooterCharacter::TakeDamage(
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	CurrentHP -= ActualDamage;
-	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, MaxHP);
+	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, CurrentHP);
 
 	ShowDamage();
 

@@ -104,7 +104,7 @@ void ABaseZone::OpenDoor()
 	float DoorRoll = CurrentDoorRatator.Roll;
 	float DoorPitch = CurrentDoorRatator.Pitch;
 
-	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorRoll, DoorPitch, 90.f));
+	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorPitch, 90.f, DoorRoll));
 }
 
 void ABaseZone::DoorUpdate(float InValue)
@@ -114,7 +114,7 @@ void ABaseZone::DoorUpdate(float InValue)
 	float DoorRoll = CurrentDoorRatator.Roll;
 	float DoorPitch = CurrentDoorRatator.Pitch;
 
-	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorRoll, DoorPitch, InValue));
+	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorPitch, InValue, DoorRoll));
 }
 
 void ABaseZone::CloseDoor()
@@ -124,6 +124,6 @@ void ABaseZone::CloseDoor()
 	float DoorRoll = CurrentDoorRatator.Roll;
 	float DoorPitch = CurrentDoorRatator.Pitch;
 
-	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorRoll, DoorPitch, 0.f));
+	DoorMeshActor->SetActorRelativeRotation(FRotator(DoorPitch, 0.f, DoorRoll));
 }
 
