@@ -277,24 +277,36 @@ void AEnemyCharacter::DropAttachment()
 			return;
 		}
 
-		const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() -1)];
+		const int32 DropCount = FMath::RandRange(MinAttachmentDrop, MaxAttachmentDrop);
 
-		FVector SpawnLocation = GetActorLocation();
-		FHitResult HitResult;
-		FVector StartLocation = GetActorLocation();
-		FVector EndLocation = StartLocation - FVector(0.f, 0.f, 500.f);
-		FCollisionQueryParams CollisionParams;
-		CollisionParams.AddIgnoredActor(this);
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+		for (int32 i = 0; i < DropCount; ++i)
 		{
-			SpawnLocation = HitResult.Location;
-		}
+			const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
 
-		if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation, FRotator::ZeroRotator))
-		{
-			if (UItemComponent* ItemComp = SpawnedItem->FindComponentByClass<UItemComponent>())
+			FVector SpawnLocation = GetActorLocation();
+			FHitResult HitResult;
+			FVector StartLocation = GetActorLocation();
+			FVector EndLocation = StartLocation - FVector(0.f, 0.f, 500.f);
+			FCollisionQueryParams CollisionParams;
+			CollisionParams.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility,
+			                                         CollisionParams))
 			{
-				ItemComp->SetItemName(RandomAttachmentName);
+				SpawnLocation = HitResult.Location;
+			}
+
+			float RandomX = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			float RandomY = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			FVector RandomOffset = FVector(RandomX, RandomY, 0.f);
+			SpawnLocation += RandomOffset;
+
+			if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation,
+			                                                       FRotator::ZeroRotator))
+			{
+				if (UItemComponent* ItemComp = SpawnedItem->FindComponentByClass<UItemComponent>())
+				{
+					ItemComp->SetItemName(RandomAttachmentName);
+				}
 			}
 		}
 	}

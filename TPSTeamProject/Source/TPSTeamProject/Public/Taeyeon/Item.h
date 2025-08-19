@@ -21,11 +21,5 @@ public:
 	TObjectPtr<UStaticMeshComponent> ItemStaticMeshComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TObjectPtr<UItemComponent> ItemComponent;
-	
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	TWeakObjectPtr<ACharacter> PlayerCharacter;
 
 };
