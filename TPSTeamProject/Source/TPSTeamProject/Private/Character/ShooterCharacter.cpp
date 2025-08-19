@@ -119,6 +119,7 @@ void AShooterCharacter::BeginPlay()
 		ZoomTimeline->SetTimelineFinishedFunc(TimelineFinished);
 	}*/
 
+	checkf(InventoryWidgetClass, TEXT("InventoryWidgetClass is not set!"));
 	InventoryComp->OnInventoryUpdated.AddDynamic(this, &AShooterCharacter::OnInventoryUpdated);
 	InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass);
 	InventoryWidget->OnItemUseRequested.AddDynamic(this, &AShooterCharacter::HandleItemUse);
@@ -126,8 +127,6 @@ void AShooterCharacter::BeginPlay()
 
 void AShooterCharacter::ToggleInventory()
 {
-	check(InventoryWidgetClass);
-
 	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
 	check(PlayerController)
 	{

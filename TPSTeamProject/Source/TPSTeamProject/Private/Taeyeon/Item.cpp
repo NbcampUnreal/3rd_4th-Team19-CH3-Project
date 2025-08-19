@@ -16,11 +16,3 @@ AItem::AItem()
 	
 	ItemComponent = CreateDefaultSubobject<UItemComponent>(TEXT("ItemComponent"));
 }
-
-void AItem::BeginPlay()
-{
-	Super::BeginPlay();
-
-	PlayerCharacter = Cast<AShooterCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	
-}

@@ -7,6 +7,8 @@
 #include "Manager/GameInstanceSubsystem/DataTableManager.h"
 #include "Taeyeon/Item.h"
 #include "Taeyeon/ItemComponent.h"
+#include "Enemy/EnemyHPBarWidget.h"
+#include "Components/WidgetComponent.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -28,6 +30,11 @@ AEnemyCharacter::AEnemyCharacter()
 	LeftArmCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LeftArmCollision"));
 	LeftArmCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
 	LeftArmCollision->SetGenerateOverlapEvents(false);
+
+	WalkerHPbarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WalkerHPbarWidgetComponent"));
+	WalkerHPbarWidgetComponent->SetupAttachment(GetMesh());
+	WalkerHPbarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	WalkerHPbarWidgetComponent->SetVisibility(false);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -43,6 +50,7 @@ void AEnemyCharacter::BeginPlay()
 
 		if (WalkerData)
 		{
+			MaxHealth = WalkerData->DefaultHP;
 			Health = WalkerData->DefaultHP;
 			Damage = WalkerData->DefaultAtk;
 			WalkSpeed = WalkerData->WalkSpeed;
@@ -63,6 +71,11 @@ void AEnemyCharacter::BeginPlay()
 
 	RightArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
 	LeftArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
+
+	//if (EnemyType != EEnemyType::Walker)
+	//{
+	//	ShowBossHPbar();
+	//}
 }
 
 float AEnemyCharacter::TakeDamage(
@@ -75,6 +88,23 @@ float AEnemyCharacter::TakeDamage(
 
 	Health -= ActualDamage;
 	UE_LOG(LogTemp, Warning, TEXT("[Enemy] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+
+	if (EnemyType == EEnemyType::Walker)
+	{
+		if (!WalkerHPbarWidgetComponent->IsVisible())
+		{
+			ShowWalkerHPbar();
+		}
+		UpdateWalkerHPbar();
+	}
+	else
+	{
+		if (!BossHPbarWidgetInstance)
+		{
+			ShowBossHPbar();
+		}
+		UpdateBossHPbar();
+	}
 
 	if (Health <= 0.0f)
 	{
@@ -164,7 +194,14 @@ void AEnemyCharacter::OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 
 void AEnemyCharacter::OnDeath()
 {
-
+	if (EnemyType == EEnemyType::Walker)
+	{
+		HideWalkerHPbar();
+	}
+	else
+	{
+		HideBossHPbar();
+	}
 
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
@@ -190,7 +227,7 @@ void AEnemyCharacter::OnDeath()
 				DeathTimerHandle,
 				this,
 				&AEnemyCharacter::OnDeathAnimationFinished,
-				Duration,
+				Duration -0.2f,
 				false
 			);
 		}
@@ -244,25 +281,109 @@ void AEnemyCharacter::DropAttachment()
 			return;
 		}
 
-		const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() -1)];
+		const int32 DropCount = FMath::RandRange(MinAttachmentDrop, MaxAttachmentDrop);
 
-		FVector SpawnLocation = GetActorLocation();
-		FHitResult HitResult;
-		FVector StartLocation = GetActorLocation();
-		FVector EndLocation = StartLocation - FVector(0.f, 0.f, 500.f);
-		FCollisionQueryParams CollisionParams;
-		CollisionParams.AddIgnoredActor(this);
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+		for (int32 i = 0; i < DropCount; ++i)
 		{
-			SpawnLocation = HitResult.Location;
-		}
+			const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
 
-		if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation, FRotator::ZeroRotator))
-		{
-			if (UItemComponent* ItemComp = SpawnedItem->FindComponentByClass<UItemComponent>())
+			FVector SpawnLocation = GetActorLocation();
+			FHitResult HitResult;
+			FVector StartLocation = GetActorLocation();
+			FVector EndLocation = StartLocation - FVector(0.f, 0.f, 500.f);
+			FCollisionQueryParams CollisionParams;
+			CollisionParams.AddIgnoredActor(this);
+			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility,
+			                                         CollisionParams))
 			{
-				ItemComp->SetItemName(RandomAttachmentName);
+				SpawnLocation = HitResult.Location;
+			}
+
+			float RandomX = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			float RandomY = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			FVector RandomOffset = FVector(RandomX, RandomY, 0.f);
+			SpawnLocation += RandomOffset;
+
+			if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation,
+			                                                       FRotator::ZeroRotator))
+			{
+				if (UItemComponent* ItemComp = SpawnedItem->FindComponentByClass<UItemComponent>())
+				{
+					ItemComp->SetItemName(RandomAttachmentName);
+				}
 			}
 		}
 	}
 }
+
+void AEnemyCharacter::ShowBossHPbar()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController) return;
+
+	if (BossHPbarWidgetInstance)
+	{
+		HideBossHPbar();
+	}
+
+	BossHPbarWidgetInstance = CreateWidget<UEnemyHPBarWidget>(PlayerController, BossHPbarWidgetClass);
+
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->AddToViewport();
+		BossHPbarWidgetInstance->InitEnemy(this);
+	}
+}
+
+void AEnemyCharacter::UpdateBossHPbar()
+{
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->UpdateHP(Health, MaxHealth);
+	}
+}
+
+void AEnemyCharacter::HideBossHPbar()
+{
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->RemoveFromParent();
+		BossHPbarWidgetInstance = nullptr;
+	}
+}
+
+void AEnemyCharacter::ShowWalkerHPbar()
+{
+	if (!WalkerHPbarWidgetClass && !WalkerHPbarWidgetComponent) return;
+
+	WalkerHPbarWidgetComponent->SetWidgetClass(WalkerHPbarWidgetClass);
+	WalkerHPbarWidgetComponent->SetVisibility(true);
+	if (UUserWidget* Widget = WalkerHPbarWidgetComponent->GetUserWidgetObject())
+	{
+		if (UEnemyHPBarWidget* WalkerWidget = Cast<UEnemyHPBarWidget>(Widget))
+		{
+			WalkerWidget->InitEnemy(this);
+		}
+	}
+}
+
+void AEnemyCharacter::UpdateWalkerHPbar()
+{
+	if (WalkerHPbarWidgetComponent && WalkerHPbarWidgetComponent->GetUserWidgetObject())
+	{
+		if (UEnemyHPBarWidget* WalkerWidget = Cast<UEnemyHPBarWidget>(WalkerHPbarWidgetComponent->GetUserWidgetObject()))
+		{
+			WalkerWidget->UpdateHP(Health, MaxHealth);
+		}
+	}
+}
+
+void AEnemyCharacter::HideWalkerHPbar()
+{
+	if (WalkerHPbarWidgetComponent)
+	{
+		WalkerHPbarWidgetComponent->SetVisibility(false);
+	}
+}
+
+
