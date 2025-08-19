@@ -5,5 +5,7 @@ enum class EMessageType : uint8
 {
 	UpdateStat,
 	ChangeMaxAmmo,
+	KillNormal,
+	KillSpecial,
 };
 

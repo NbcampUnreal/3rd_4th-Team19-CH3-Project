@@ -5,6 +5,8 @@
 #include "BaseZone.generated.h"
 
 class UBoxComponent;
+class UZoneChecker;
+class UObjectTweenComponent;
 
 UCLASS()
 class TPSTEAMPROJECT_API ABaseZone : public AActor
@@ -17,6 +19,26 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trigger")
 	UBoxComponent* TriggerBox;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
+	TObjectPtr<AStaticMeshActor> DoorMeshActor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	TObjectPtr<UObjectTweenComponent> OpenDoorTween;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	TObjectPtr<UObjectTweenComponent> CloseDoorTween;
+
+	UFUNCTION(BlueprintCallable)
+	void DoorOpen();
+	UFUNCTION(BlueprintCallable)
+	void DoorClose();
+
+	void Initialize(int32 InNormalCount, int32 InSpecialCount);
+
+	void DecreaseNormal();
+	void DecreaseSpecial();
+	bool IsClear();
+
+	virtual void BeginPlay() override;
+
 protected:
 
 	UFUNCTION()
@@ -26,4 +48,15 @@ protected:
 
 	UFUNCTION(Blueprintable, Category = "Trigger")
 	virtual void ExecuteTriggerAction(AActor* OtherActor);
+
+private:
+	UPROPERTY()
+	TObjectPtr<UZoneChecker> ZoneChecker;
+
+	UFUNCTION()
+	void OpenDoor();
+	UFUNCTION()
+	void DoorUpdate(float InValue);
+	UFUNCTION()
+	void CloseDoor();
 };

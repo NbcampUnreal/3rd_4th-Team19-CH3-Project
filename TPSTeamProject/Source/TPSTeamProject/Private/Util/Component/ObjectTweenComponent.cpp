@@ -92,6 +92,16 @@ void UObjectTweenComponent::PlayFromStart()
 	TweenTimelineComp->PlayFromStart();
 }
 
+void UObjectTweenComponent::Reverse()
+{
+	if (IsValid(TweenTimelineComp) == false)
+	{
+		return;
+	}
+
+	TweenTimelineComp->Reverse();
+}
+
 void UObjectTweenComponent::EndPlay(EEndPlayReason::Type InType)
 {
 	Super::EndPlay(InType);

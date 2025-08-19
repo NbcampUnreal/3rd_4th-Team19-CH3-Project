@@ -47,6 +47,7 @@ public:
 	void AddBoolEvent(UObject* InObject, const FName& UpdateFunctionName, float InTime);
 
 	void PlayFromStart();
+	void Reverse();
 	void EndPlay(EEndPlayReason::Type);
 
 protected:
