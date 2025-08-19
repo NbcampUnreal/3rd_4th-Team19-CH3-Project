@@ -1,4 +1,5 @@
 #include "Stat/GunStatCalculater.h"
+#include "Stat/StatTypes.h"
 
 UGunStatCalculater::UGunStatCalculater()
 {
@@ -7,5 +8,6 @@ UGunStatCalculater::UGunStatCalculater()
 
 int32 UGunStatCalculater::GetMaxAmmoCount()
 {
-	return 30;
+	auto MaxAmmoPtr = CurrentValueMap.Find(EGameStatType::MaxAmmoCount);
+	return MaxAmmoPtr ? *MaxAmmoPtr : 0;
 }

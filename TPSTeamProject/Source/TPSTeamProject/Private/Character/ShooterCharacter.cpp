@@ -15,6 +15,8 @@
 #include "TPSGameInstance.h"
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
+#include "Sound/SoundCue.h"
+#include "UI/CrosshairComponent.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -32,9 +34,13 @@ AShooterCharacter::AShooterCharacter()
 	ZoomTween = CreateDefaultSubobject<UObjectTweenComponent>(TEXT("ZoomTween"));
 	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 
+	CrosshairComp = CreateDefaultSubobject<UCrosshairComponent>(TEXT("CrosshairComp"));
+
 	bIsZoom = false;
 	bIsAuto = false;
 	bIsCloseContact = false;
+
+	SprintSpeed = 1.f;
 }
 
 void AShooterCharacter::BeginPlay()
@@ -63,9 +69,11 @@ void AShooterCharacter::BeginPlay()
 			return;
 		}
 
-		GunActor->Fire();
+		CanFire();
 
-		double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+		//GunActor->Fire();
+
+		/*double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
 		double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
 
 		AddControllerYawInput(RecoilYaw);
@@ -77,7 +85,7 @@ void AShooterCharacter::BeginPlay()
 			{
 				AnimInstance->Montage_Play(FireMontage);
 			}
-		}
+		}*/
 	});
 
 	CloseContactDelegate.BindLambda([this]()
@@ -251,6 +259,33 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 					&AShooterCharacter::ToggleInventory
 				);
 			}
+
+			ensure(PlayerController->ReloadAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->ReloadAction,
+					ETriggerEvent::Started,
+					this,
+					&AShooterCharacter::Reload
+				);
+			}
+
+			ensure(PlayerController->SprintAction);
+			{
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Started,
+					this,
+					&AShooterCharacter::OnSprint
+				);
+
+				EnhancedInput->BindAction(
+					PlayerController->SprintAction,
+					ETriggerEvent::Completed,
+					this,
+					&AShooterCharacter::OffSprint
+				);
+			}
 		}
 	}
 }
@@ -265,12 +300,16 @@ void AShooterCharacter::Move(const FInputActionValue& value)
 
 	if (FMath::IsNearlyZero(Direction.X) == false)
 	{
-		AddMovementInput(GetActorForwardVector() * Direction.X, 5.f);
+		AddMovementInput(GetActorForwardVector() * Direction.X * SprintSpeed, 5.f * SprintSpeed);
+
+		UE_LOG(LogTemp, Log, TEXT("SpeedX : %lf"), GetVelocity().X);
 	}
 
 	if (FMath::IsNearlyZero(Direction.Y) == false)
 	{
-		AddMovementInput(GetActorRightVector() * Direction.Y, 5.f);
+		AddMovementInput(GetActorRightVector() * Direction.Y * SprintSpeed, 5.f * SprintSpeed);
+
+		UE_LOG(LogTemp, Log, TEXT("SpeedY : %lf"), GetVelocity().Y);
 	}
 }
 
@@ -279,7 +318,7 @@ void AShooterCharacter::Look(const FInputActionValue& value)
 	FVector2D LookInput = value.Get<FVector2D>();
 
 	AddControllerYawInput(LookInput.X);
-	AddControllerPitchInput(LookInput.Y);
+	AddControllerPitchInput(-LookInput.Y);
 }
 
 void AShooterCharacter::StartJump(const FInputActionValue& value)
@@ -306,27 +345,18 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 		return;
 	}*/
 
+	if (bIsReload)
+	{
+		return;
+	}
+
 	if (bIsAuto == false)
 	{
 		if (bIsShoot == false)
 		{
 			bIsShoot = true;
 
-			GunActor->Fire();
-
-			double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
-			double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
-
-			AddControllerYawInput(RecoilYaw);
-			AddControllerPitchInput(RecoilPitch);
-
-			if (FireMontage)
-			{
-				if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-				{
-					AnimInstance->Montage_Play(FireMontage);
-				}
-			}
+			CanFire();
 		}
 
 		return;
@@ -349,11 +379,10 @@ void AShooterCharacter::Shooting(const FInputActionValue& value)
 
 void AShooterCharacter::StopShooting(const FInputActionValue& value)
 {
-	/*bool bShootTrigger = value.Get<bool>();
-	if (bShootTrigger == false)
+	if (bIsReload)
 	{
 		return;
-	}*/
+	}
 
 	bIsShoot = false;
 
@@ -441,6 +470,8 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 
 			PlayerController->SetViewTargetWithBlend(GunActor, 0.1f);
 
+			CrosshairComp->SetActive(false);
+
 			bIsZoom = true;
 		}
 		else
@@ -450,6 +481,8 @@ void AShooterCharacter::ZoomEnd(const FInputActionValue& value)
 			ensure(PlayerController);
 
 			PlayerController->SetViewTargetWithBlend(this, 0.1f);
+
+			CrosshairComp->SetActive(true);
 
 			bIsZoom = false;
 		}
@@ -546,6 +579,74 @@ void AShooterCharacter::OnInventoryUpdated()
 	}
 }
 
+void AShooterCharacter::Reload()
+{
+	if (bIsShoot || bIsZoom || bIsCloseContact)
+	{
+		return;
+	}
+
+	bIsReload = true;
+
+	if (ReloadMontage)
+	{
+		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+		}
+	}
+}
+
+void AShooterCharacter::ReloadFinished()
+{
+	if (bIsShoot || bIsZoom || bIsCloseContact)
+	{
+		return;
+	}
+
+	bIsReload = false;
+}
+
+void AShooterCharacter::OnSprint()
+{
+	SprintSpeed = 500000.f;
+
+	UE_LOG(LogTemp, Log, TEXT("Sprint"));
+}
+
+void AShooterCharacter::OffSprint()
+{
+	SprintSpeed = 1.f;
+}
+
+bool AShooterCharacter::CanFire()
+{
+	if (IsValid(GunActor) == false)
+	{
+		return false;
+	}
+
+	bool bCanFire = GunActor->Fire();
+	if (bCanFire)
+	{
+		double RecoilYaw = FMath::FRandRange(-0.1f, 0.1f);
+		double RecoilPitch = FMath::FRandRange(-0.5f, 0.f);
+
+		AddControllerYawInput(RecoilYaw);
+		AddControllerPitchInput(RecoilPitch);
+
+		if (FireMontage)
+		{
+			if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+			{
+				AnimInstance->Montage_Play(FireMontage);
+			}
+		}
+	}
+
+	return bCanFire;
+}
+
 void AShooterCharacter::HandleItemUse(const FInventorySlot& SlotData)
 {
 	if (SlotData.ItemName.IsNone())
@@ -593,5 +694,61 @@ void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
 void AShooterCharacter::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Death!"));
+
+	AShootPlayerController* PlayerController = Cast<AShootPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->UnPossess();
+	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+
+	if (DeathSound)
+	{
+		PlaySoundDeath();
+	}
+
+	if (DeathMontage)
+	{
+		PlayAnimationDeath();
+	}
+	else
+	{
+		Destroy();
+	}
+}
+
+
+void AShooterCharacter::PlaySoundDeath()
+{
+	if (!DeathSound)	return;
+
+	if (DeathSound->IsPlayable())
+	{
+		UGameplayStatics::PlaySound2D(this, DeathSound);
+	}
+}
+
+void AShooterCharacter::PlayAnimationDeath()
+{
+	float Duration = PlayAnimMontage(DeathMontage);
+
+	if (Duration > 0.0f)
+	{
+		FTimerHandle DeathTimerHandle;
+		GetWorldTimerManager().SetTimer(
+			DeathTimerHandle,
+			[this]() {
+				this->Destroy();
+			},
+			Duration - 0.2f,
+			false
+		);
+	}
+	else
+	{
+		Destroy();
+	}
 }
 

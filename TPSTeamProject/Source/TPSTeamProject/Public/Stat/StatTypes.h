@@ -7,6 +7,7 @@ enum class EGameStatType : uint8
 	HP,
 	Def,
 	Stamina,
+	MaxAmmoCount,
 };
 
 TArray<EGameStatType> GetStatTypes();

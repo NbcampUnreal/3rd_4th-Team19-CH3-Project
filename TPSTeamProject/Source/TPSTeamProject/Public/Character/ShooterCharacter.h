@@ -16,6 +16,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UObjectTweenComponent;
 class UStatCalculater;
+class USoundCue;
+class UCrosshairComponent;
 
 UCLASS()
 class TPSTEAMPROJECT_API AShooterCharacter : public ACharacter, public IObserver, public IGenericTeamAgentInterface
@@ -27,7 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun")
 	TSubclassOf<class AGunActor> GunClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
 	TObjectPtr<class AGunActor> GunActor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -38,6 +40,18 @@ public:
 	TObjectPtr<UObjectTweenComponent> ZoomTween;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> FireMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> ReloadMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> DeathMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	TObjectPtr<USoundCue> DeathSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	TObjectPtr<UCrosshairComponent> CrosshairComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	bool bIsShoot;
 
 protected:
 	virtual void BeginPlay() override;
@@ -45,14 +59,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveValue")
 	float InputDirectionAngle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
-	bool bIsShoot;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsAuto;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsZoom;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ObjectTween")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsCloseContact;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	bool bIsReload;
 	UPROPERTY()
 	TArray<TObjectPtr<UStatCalculater>> StatCalculaters;
 
@@ -64,7 +78,7 @@ protected:
 	TObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> InventoryComp;
-	
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -83,9 +97,17 @@ public:
 
 	virtual FGenericTeamId GetGenericTeamId() const override { return TeamId; }
 
+	UFUNCTION()
 	void OnDeath();
+	UFUNCTION()
+	void PlaySoundDeath();
+	UFUNCTION()
+	void PlayAnimationDeath();
 
 private:
+
+	UPROPERTY()
+	float SprintSpeed;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
@@ -117,6 +139,17 @@ private:
 	void Interaction();
 	UFUNCTION()
 	void OnInventoryUpdated();
+	UFUNCTION()
+	void Reload();
+	UFUNCTION()
+	void ReloadFinished();
+	UFUNCTION()
+	void OnSprint();
+	UFUNCTION()
+	void OffSprint();
+
+	UFUNCTION()
+	bool CanFire();
 	UFUNCTION()
 	void HandleItemUse(const FInventorySlot& SlotData);
 

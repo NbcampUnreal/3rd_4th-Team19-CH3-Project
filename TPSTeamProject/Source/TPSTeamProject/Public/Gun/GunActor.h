@@ -11,6 +11,7 @@ class UObjectTweenComponent;
 class UEquipmentParts;
 class UStatCalculater;
 class UGunStatCalculater;
+class UNiagaraSystem;
 enum class EAttachmentSlot : uint8;
 
 UCLASS()
@@ -21,12 +22,17 @@ class TPSTEAMPROJECT_API AGunActor : public AActor
 public:	
 	AGunActor();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	int32 CurrentAmmoCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
+	int32 MaxAmmoCount;
+
 protected:
 	virtual void BeginPlay() override;
 
 public:	
 	UFUNCTION(BlueprintCallable)
-	void Fire();
+	bool Fire();
 
 	FORCEINLINE UCameraComponent* GetScopeCameraComp() const;
 
@@ -34,6 +40,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ChangeParts(int32 Index, EAttachmentSlot InType);
+	UFUNCTION(BlueprintCallable)
+	void Reload();
 
 	FORCEINLINE UStatCalculater* GetStatCalculater() const;
 
@@ -68,6 +76,8 @@ protected:
 	TObjectPtr<UPointLightComponent> MuzzleLight;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
 	TObjectPtr<USceneComponent> FirePoint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun")
+	TObjectPtr<USceneComponent> ShellEjectPoint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Properties")
 	int32 FireRange;
@@ -85,12 +95,20 @@ protected:
 	TObjectPtr<class UTexture> CamoTexture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
 	TObjectPtr<USoundBase> FireBulletSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shoot")
+	TObjectPtr<USoundBase> EmptyAmmoSound;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shoot")
 	bool IsFire;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	TObjectPtr<UMaterialInterface> EnemyHitParticle;
+	TObjectPtr<UNiagaraSystem> EnemyHitEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	TObjectPtr<UMaterialInterface> NonEnemyHitParticle;
+	TObjectPtr<UNiagaraSystem> NonEnemyHitEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UNiagaraSystem> FireEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UNiagaraSystem> ShellEjectEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TObjectPtr<UMaterialInterface> FireTrace;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMeshToScope();
@@ -123,9 +141,14 @@ private:
 	UFUNCTION()
 	void InitializeAttachment();
 	UFUNCTION()
-	void PlayFireSound();
+	void PlayFireSound(bool IsExistAmmo);
 	UFUNCTION()
 	void UpdateShooterStat();
+	UFUNCTION()
+	void UpdateMaxAmmoCount();
+
+	UFUNCTION()
+	FORCEINLINE bool IsExistAmmo() const;
 
 	FCollisionQueryParams Params;
 	const FName HitBone_Head = FName("head");
