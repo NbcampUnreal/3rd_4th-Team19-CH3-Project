@@ -80,11 +80,6 @@ void AGunActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//StatCollection = NewObject<UStatContainerCollection>();
-	InitializeAttachment();
-
-	Params.AddIgnoredActor(this);
-
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
 		CameraManager = PlayerController->PlayerCameraManager;
@@ -92,7 +87,14 @@ void AGunActor::BeginPlay()
 		{
 			ShooterState->AddStatCalculater(StatCalculater);
 		}
+
+		AShooterCharacter* Character = Cast<AShooterCharacter>(PlayerController->GetCharacter());
+		Character->AddStatCalculater(StatCalculater);
 	}
+
+	InitializeAttachment();
+
+	Params.AddIgnoredActor(this);
 
 	if (IsValid(ShootFireTweenComp))
 	{

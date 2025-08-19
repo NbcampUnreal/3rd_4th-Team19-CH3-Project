@@ -53,6 +53,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterState")
 	bool bIsShoot;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float MaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float CurrentHP;
+
+	void AddStatCalculater(UStatCalculater* InCalculater);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -69,8 +76,6 @@ protected:
 	bool bIsReload;
 	UPROPERTY()
 	TArray<TObjectPtr<UStatCalculater>> StatCalculaters;
-
-	float Health = 100.0f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;

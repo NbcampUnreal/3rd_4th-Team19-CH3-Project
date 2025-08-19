@@ -24,9 +24,19 @@ void AShooterGameMode::BeginPlay()
 	TArray<AActor*> OutputActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseZone::StaticClass(), OutputActors);
 
-	for (auto& OutputActor : OutputActors)
+	TArray<FString> NameArray = { TEXT("1WaveZone_C_1"), TEXT("2WaveZone_C_1") , TEXT("3WaveZone_C_1") , TEXT("4WaveZone_C_1") };
+
+	for (const auto& ActorName : NameArray)
 	{
-		ZoneList.Add(Cast<ABaseZone>(OutputActor));
+		for (auto& OutputActor : OutputActors)
+		{
+			if (OutputActor && OutputActor->GetName().Equals(ActorName))
+			{
+				ZoneList.Add(Cast<ABaseZone>(OutputActor));
+
+				break;
+			}
+		}
 	}
 
 	InitializeZone InitializeZoneDelegate;
@@ -51,6 +61,11 @@ void AShooterGameMode::BeginPlay()
 
 void AShooterGameMode::OnEvent(EMessageType InMsgType, int32 InParam)
 {
+	if (!(InMsgType == EMessageType::KillNormal) && !(InMsgType == EMessageType::KillSpecial))
+	{
+		return;
+	}
+
 	int32 StageIndex = InParam - 1;
 	if (ZoneList.IsValidIndex(StageIndex) == false)
 	{

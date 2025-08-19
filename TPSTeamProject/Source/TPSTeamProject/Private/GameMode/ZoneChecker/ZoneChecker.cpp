@@ -13,7 +13,7 @@ void UZoneChecker::Initialize(int32 InNormalCount, int32 InSpecialCount)
 
 bool UZoneChecker::IsClear()
 {
-	return NormalMonsterCount == 0 && SpecialMonsterCount == 0;
+	return SpecialMonsterCount == 0;
 }
 
 void UZoneChecker::DecreaseNormalMonsterCount()

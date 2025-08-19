@@ -47,9 +47,22 @@ AShooterCharacter::AShooterCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 }
 
+void AShooterCharacter::AddStatCalculater(UStatCalculater* InCalculater)
+{
+	StatCalculaters.Add(InCalculater);
+}
+
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		ObserverManager->Subscribe(this);
+	}
 
 	GunActor = GetWorld()->SpawnActor<AGunActor>(GunClass);
 	GetMesh()->HideBoneByName(TEXT("Weapon"), EPhysBodyOp::PBO_None);
@@ -64,7 +77,7 @@ void AShooterCharacter::BeginPlay()
 		ObserverManager->Subscribe(this);
 	}
 
-	StatCalculaters.Add(GunActor->GetStatCalculater());
+	//StatCalculaters.Add(GunActor->GetStatCalculater());
 
 	ShootDelegate.BindLambda([this]()
 	{
@@ -678,10 +691,10 @@ float AShooterCharacter::TakeDamage(
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	Health -= ActualDamage;
-	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+	CurrentHP -= ActualDamage;
+	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, MaxHP);
 
-	if (Health <= 0.0f)
+	if (CurrentHP <= 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player is dead."));
 		OnDeath();
@@ -700,7 +713,8 @@ void AShooterCharacter::OnEvent(EMessageType InMsgType, int32 InParam)
 			MaxHealth += StatCalculater->GetMaxHP();
 		}
 
-		Health = MaxHealth;
+		CurrentHP = MaxHealth;
+		MaxHP = MaxHealth;
 	}
 }
 
