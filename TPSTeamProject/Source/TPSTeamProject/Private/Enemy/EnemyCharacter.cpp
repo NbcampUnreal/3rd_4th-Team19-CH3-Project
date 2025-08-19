@@ -190,7 +190,7 @@ void AEnemyCharacter::OnDeath()
 				DeathTimerHandle,
 				this,
 				&AEnemyCharacter::OnDeathAnimationFinished,
-				Duration,
+				Duration -0.2f,
 				false
 			);
 		}
