@@ -102,7 +102,7 @@ public:
 	void EnableRightArmCollision(bool bEnable);
 	void EnableBothArmCollision(bool bEnable);
 
-	void OnDeath();
+	virtual void OnDeath();
 	void OnDeathAnimationFinished();
 
 	void DropItems();

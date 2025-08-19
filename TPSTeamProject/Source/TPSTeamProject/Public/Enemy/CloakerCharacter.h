@@ -17,12 +17,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Materials")
 	TArray<UMaterialInterface*> OriginalMaterials;
 
-	virtual float TakeDamage(
-		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser) override;
-
 	virtual void OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -30,9 +24,9 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult) override;
 
-	void SetTranslucent(bool bTranslucent);
+	virtual void OnDeath() override;
 
-	bool bTakedDamage = false;
+	void SetTranslucent(bool bTranslucent);
 
 protected:
 	virtual void BeginPlay();
