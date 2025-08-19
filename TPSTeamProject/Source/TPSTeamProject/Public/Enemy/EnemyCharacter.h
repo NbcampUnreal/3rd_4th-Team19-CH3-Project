@@ -33,6 +33,8 @@ public:
 	int32 MaxAttachmentDrop = 3;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	TSubclassOf<AItem> CommonAttachmentItemClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	float ItemSpawnRadius = 30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* BodyCollision;

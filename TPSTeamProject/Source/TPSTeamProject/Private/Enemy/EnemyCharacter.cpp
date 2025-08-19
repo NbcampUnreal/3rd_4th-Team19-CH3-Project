@@ -262,6 +262,11 @@ void AEnemyCharacter::DropAttachment()
 				SpawnLocation = HitResult.Location;
 			}
 
+			float RandomX = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			float RandomY = FMath::FRandRange(-ItemSpawnRadius, ItemSpawnRadius);
+			FVector RandomOffset = FVector(RandomX, RandomY, 0.f);
+			SpawnLocation += RandomOffset;
+
 			if (AItem* SpawnedItem = GetWorld()->SpawnActor<AItem>(CommonAttachmentItemClass, SpawnLocation,
 			                                                       FRotator::ZeroRotator))
 			{
