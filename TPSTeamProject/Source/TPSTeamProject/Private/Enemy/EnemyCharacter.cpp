@@ -7,6 +7,8 @@
 #include "Manager/GameInstanceSubsystem/DataTableManager.h"
 #include "Taeyeon/Item.h"
 #include "Taeyeon/ItemComponent.h"
+#include "Enemy/EnemyHPBarWidget.h"
+#include "Components/WidgetComponent.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -28,6 +30,11 @@ AEnemyCharacter::AEnemyCharacter()
 	LeftArmCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("LeftArmCollision"));
 	LeftArmCollision->SetupAttachment(GetMesh(), TEXT("hand_l"));
 	LeftArmCollision->SetGenerateOverlapEvents(false);
+
+	WalkerHPbarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WalkerHPbarWidgetComponent"));
+	WalkerHPbarWidgetComponent->SetupAttachment(GetMesh());
+	WalkerHPbarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	WalkerHPbarWidgetComponent->SetVisibility(false);
 }
 
 void AEnemyCharacter::BeginPlay()
@@ -43,6 +50,7 @@ void AEnemyCharacter::BeginPlay()
 
 		if (WalkerData)
 		{
+			MaxHealth = WalkerData->DefaultHP;
 			Health = WalkerData->DefaultHP;
 			Damage = WalkerData->DefaultAtk;
 			WalkSpeed = WalkerData->WalkSpeed;
@@ -63,6 +71,15 @@ void AEnemyCharacter::BeginPlay()
 
 	RightArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
 	LeftArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
+
+	if (EnemyType == EEnemyType::Walker)
+	{
+		ShowWalkerHPbar();
+	}
+	else
+	{
+		ShowBossHPbar();
+	}
 }
 
 float AEnemyCharacter::TakeDamage(
@@ -75,6 +92,15 @@ float AEnemyCharacter::TakeDamage(
 
 	Health -= ActualDamage;
 	UE_LOG(LogTemp, Warning, TEXT("[Enemy] took %.1f damage. Current HP: %.1f"), ActualDamage, Health);
+
+	if (EnemyType == EEnemyType::Walker)
+	{
+		UpdateWalkerHPbar();
+	}
+	else
+	{
+		UpdateBossHPbar();
+	}
 
 	if (Health <= 0.0f)
 	{
@@ -164,7 +190,14 @@ void AEnemyCharacter::OnArmOverlap(UPrimitiveComponent* OverlappedComponent,
 
 void AEnemyCharacter::OnDeath()
 {
-
+	if (EnemyType == EEnemyType::Walker)
+	{
+		HideWalkerHPbar();
+	}
+	else
+	{
+		HideBossHPbar();
+	}
 
 	AEnemyController* AIController = Cast<AEnemyController>(GetController());
 	if (AIController)
@@ -266,3 +299,75 @@ void AEnemyCharacter::DropAttachment()
 		}
 	}
 }
+
+void AEnemyCharacter::ShowBossHPbar()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController) return;
+
+	if (BossHPbarWidgetInstance)
+	{
+		HideBossHPbar();
+	}
+
+	BossHPbarWidgetInstance = CreateWidget<UEnemyHPBarWidget>(PlayerController, BossHPbarWidgetClass);
+
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->AddToViewport();
+		BossHPbarWidgetInstance->InitEnemy(this);
+	}
+}
+
+void AEnemyCharacter::UpdateBossHPbar()
+{
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->UpdateHP(Health, MaxHealth);
+	}
+}
+
+void AEnemyCharacter::HideBossHPbar()
+{
+	if (BossHPbarWidgetInstance)
+	{
+		BossHPbarWidgetInstance->RemoveFromParent();
+		BossHPbarWidgetInstance = nullptr;
+	}
+}
+
+void AEnemyCharacter::ShowWalkerHPbar()
+{
+	if (!WalkerHPbarWidgetClass && !WalkerHPbarWidgetComponent) return;
+
+	WalkerHPbarWidgetComponent->SetWidgetClass(WalkerHPbarWidgetClass);
+	WalkerHPbarWidgetComponent->SetVisibility(true);
+	if (UUserWidget* Widget = WalkerHPbarWidgetComponent->GetUserWidgetObject())
+	{
+		if (UEnemyHPBarWidget* WalkerWidget = Cast<UEnemyHPBarWidget>(Widget))
+		{
+			WalkerWidget->InitEnemy(this);
+		}
+	}
+}
+
+void AEnemyCharacter::UpdateWalkerHPbar()
+{
+	if (WalkerHPbarWidgetComponent && WalkerHPbarWidgetComponent->GetUserWidgetObject())
+	{
+		if (UEnemyHPBarWidget* WalkerWidget = Cast<UEnemyHPBarWidget>(WalkerHPbarWidgetComponent->GetUserWidgetObject()))
+		{
+			WalkerWidget->UpdateHP(Health, MaxHealth);
+		}
+	}
+}
+
+void AEnemyCharacter::HideWalkerHPbar()
+{
+	if (WalkerHPbarWidgetComponent)
+	{
+		WalkerHPbarWidgetComponent->SetVisibility(false);
+	}
+}
+
+

@@ -8,6 +8,7 @@
 #include "EnemyCharacter.generated.h"
 
 class AItem;
+class UEnemyHPBarWidget;
 
 UCLASS()
 class TPSTEAMPROJECT_API AEnemyCharacter : public ACharacter ,public IGenericTeamAgentInterface
@@ -37,12 +38,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
 	UCapsuleComponent* LeftArmCollision;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UEnemyHPBarWidget> BossHPbarWidgetClass;
+	UPROPERTY()
+	UEnemyHPBarWidget* BossHPbarWidgetInstance;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UEnemyHPBarWidget> WalkerHPbarWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	class UWidgetComponent* WalkerHPbarWidgetComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataType")
 	EEnemyType EnemyType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	UAnimMontage* DeathMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float MaxHealth = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float Health = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -88,6 +101,14 @@ public:
 
 	void DropItems();
 	void DropAttachment();
+
+	void ShowBossHPbar();
+	void UpdateBossHPbar();
+	void HideBossHPbar();
+
+	void ShowWalkerHPbar();
+	void UpdateWalkerHPbar();
+	void HideWalkerHPbar();
 
 private:
 	FGenericTeamId TeamId = FGenericTeamId(1); //팀 ID
