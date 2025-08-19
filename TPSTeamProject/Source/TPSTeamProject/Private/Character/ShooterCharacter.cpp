@@ -52,6 +52,7 @@ void AShooterCharacter::AddStatCalculater(UStatCalculater* InCalculater)
 	StatCalculaters.Add(InCalculater);
 }
 
+
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -557,7 +558,7 @@ void AShooterCharacter::Interaction()
 		UEngineTypes::ConvertToTraceType(ECC_Visibility),
 		false,
 		{this},
-		EDrawDebugTrace::ForDuration,
+		EDrawDebugTrace::None,
 		OutHits,
 		true
 	);
@@ -694,6 +695,8 @@ float AShooterCharacter::TakeDamage(
 	CurrentHP -= ActualDamage;
 	UE_LOG(LogTemp, Warning, TEXT("[Player] took %.1f damage. Current HP: %.1f"), ActualDamage, MaxHP);
 
+	ShowDamage();
+
 	if (CurrentHP <= 0.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Player is dead."));
@@ -779,3 +782,31 @@ void AShooterCharacter::PlayAnimationDeath()
 	}
 }
 
+void AShooterCharacter::ShowDamage()
+{
+	RemoveDamageWidgetInstance();
+	if (DamageWidgetClass)
+	{
+		DamageWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), DamageWidgetClass);
+		if (DamageWidgetInstance)
+		{
+			DamageWidgetInstance->AddToViewport();
+			UFunction* DamageAnimFunc = DamageWidgetInstance->FindFunction(FName("DamageAnim"));
+			if (DamageAnimFunc)
+			{
+				DamageWidgetInstance->ProcessEvent(DamageAnimFunc, nullptr);
+				GetWorldTimerManager().ClearTimer(DamageAnimTimerHandle);
+				GetWorld()->GetTimerManager().SetTimer(DamageAnimTimerHandle, this, &AShooterCharacter::RemoveDamageWidgetInstance, 1, false);
+			}
+		}
+	}
+}
+
+void AShooterCharacter::RemoveDamageWidgetInstance()
+{
+	if (DamageWidgetInstance)
+	{
+		DamageWidgetInstance->RemoveFromParent();
+		DamageWidgetInstance = nullptr;
+	}
+}

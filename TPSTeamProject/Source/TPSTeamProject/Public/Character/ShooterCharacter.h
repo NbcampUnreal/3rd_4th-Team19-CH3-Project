@@ -60,6 +60,11 @@ public:
 
 	void AddStatCalculater(UStatCalculater* InCalculater);
 
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	void ShowDamage();
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	void RemoveDamageWidgetInstance();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -83,6 +88,12 @@ protected:
 	TObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TObjectPtr<UInventoryComponent> InventoryComp;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	TSubclassOf<UUserWidget> DamageWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Damage")
+	TObjectPtr<UUserWidget> DamageWidgetInstance = nullptr;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -164,6 +175,7 @@ private:
 
 	FTimerHandle AutoShootTimerHandle;
 	FTimerHandle CloseContactTimerHandle;
+	FTimerHandle DamageAnimTimerHandle;
 
 	FGenericTeamId TeamId = FGenericTeamId(2);
 };
