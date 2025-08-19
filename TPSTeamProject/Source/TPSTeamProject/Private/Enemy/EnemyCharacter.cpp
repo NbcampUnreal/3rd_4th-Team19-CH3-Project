@@ -9,6 +9,8 @@
 #include "Taeyeon/ItemComponent.h"
 #include "Enemy/EnemyHPBarWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Manager/GameInstanceSubsystem/ObserverManager.h"
+#include "Manager/ObserverManager/MessageType.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -200,6 +202,32 @@ void AEnemyCharacter::OnDeath()
 	}
 	else
 	{
+		UWorld* World = GetWorld();
+		if (!World)
+		{
+			return;
+		}
+
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		if (EnemyType == EEnemyType::Screamer)
+		{
+			ObserverManager->SendEvent(EMessageType::KillSpecial, 1);
+		}
+		else if (EnemyType == EEnemyType::Spitter)
+		{
+			ObserverManager->SendEvent(EMessageType::KillSpecial, 2);
+		}
+		else if (EnemyType == EEnemyType::Cloaker)
+		{
+			ObserverManager->SendEvent(EMessageType::KillSpecial, 3);
+		}
+		else if (EnemyType == EEnemyType::Brute)
+		{
+			ObserverManager->SendEvent(EMessageType::KillSpecial, 4);
+		}
+
 		HideBossHPbar();
 	}
 
