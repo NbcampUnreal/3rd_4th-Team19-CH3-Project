@@ -108,6 +108,7 @@ private:
 
 	UPROPERTY()
 	float SprintSpeed;
+	float NormalSpeed;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
