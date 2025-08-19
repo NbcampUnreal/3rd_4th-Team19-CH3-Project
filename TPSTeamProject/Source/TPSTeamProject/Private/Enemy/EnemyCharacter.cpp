@@ -72,14 +72,10 @@ void AEnemyCharacter::BeginPlay()
 	RightArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
 	LeftArmCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnArmOverlap);
 
-	if (EnemyType == EEnemyType::Walker)
-	{
-		ShowWalkerHPbar();
-	}
-	else
-	{
-		ShowBossHPbar();
-	}
+	//if (EnemyType != EEnemyType::Walker)
+	//{
+	//	ShowBossHPbar();
+	//}
 }
 
 float AEnemyCharacter::TakeDamage(
@@ -95,10 +91,18 @@ float AEnemyCharacter::TakeDamage(
 
 	if (EnemyType == EEnemyType::Walker)
 	{
+		if (!WalkerHPbarWidgetComponent->IsVisible())
+		{
+			ShowWalkerHPbar();
+		}
 		UpdateWalkerHPbar();
 	}
 	else
 	{
+		if (!BossHPbarWidgetInstance)
+		{
+			ShowBossHPbar();
+		}
 		UpdateBossHPbar();
 	}
 
