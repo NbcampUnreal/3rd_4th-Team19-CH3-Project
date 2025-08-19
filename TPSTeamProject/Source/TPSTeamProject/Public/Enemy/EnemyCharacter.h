@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float AttachmentDropChance = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	int32 MinAttachmentDrop = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	int32 MaxAttachmentDrop = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	TSubclassOf<AItem> CommonAttachmentItemClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component")
