@@ -40,7 +40,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> SprintAction;
 
-
 protected:
 	virtual void BeginPlay() override;
 

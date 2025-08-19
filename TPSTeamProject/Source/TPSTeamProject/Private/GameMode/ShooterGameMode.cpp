@@ -4,6 +4,7 @@
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/GameOverWidget.h"
 
 AShooterGameMode::AShooterGameMode()
 {
@@ -12,7 +13,7 @@ AShooterGameMode::AShooterGameMode()
 
 void AShooterGameMode::ClearGame()
 {
-
+	ShowGameOverScreen();
 }
 
 void AShooterGameMode::BeginPlay()
@@ -98,6 +99,36 @@ void AShooterGameMode::OnEvent(EMessageType InMsgType, int32 InParam)
 		{
 			ClearGame();
 		}
+	}
+}
+
+
+void AShooterGameMode::ShowGameOverScreen()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PlayerController) return;
+
+	if (GameOverWidgetInstance)
+	{
+		HideGameOverScreen();
+	}
+
+	GameOverWidgetInstance = CreateWidget<UGameOverWidget>(PlayerController, GameOverWidgetClass);
+
+	if (GameOverWidgetInstance)
+	{
+		GameOverWidgetInstance->AddToViewport();
+		PlayerController->bShowMouseCursor = true;
+		PlayerController->SetInputMode(FInputModeUIOnly());
+	}
+}
+
+void AShooterGameMode::HideGameOverScreen()
+{
+	if (GameOverWidgetInstance)
+	{
+		GameOverWidgetInstance->RemoveFromParent();
+		GameOverWidgetInstance = nullptr;
 	}
 }
 
