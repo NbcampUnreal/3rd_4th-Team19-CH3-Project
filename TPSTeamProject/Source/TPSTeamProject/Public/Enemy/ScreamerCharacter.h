@@ -17,7 +17,7 @@ public:
 	void Scream();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
-	float SpawnRadius = 300.0f;
+	float SpawnRadius = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	int32 SpawnCount = 5;
 
