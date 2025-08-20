@@ -313,7 +313,7 @@ void AEnemyCharacter::DropAttachment()
 
 		for (int32 i = 0; i < DropCount; ++i)
 		{
-			const FName RandomAttachmentName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
+			const FName RandomAttachmentName = RowNames[FMath::RandRange(12, 17)];
 
 			FVector SpawnLocation = GetActorLocation();
 			FHitResult HitResult;

@@ -11,6 +11,7 @@ UENUM(BlueprintType)
 enum class EItemType : uint8
 {
 	Coin,
+	Attachment,
 };
 
 USTRUCT(BlueprintType)

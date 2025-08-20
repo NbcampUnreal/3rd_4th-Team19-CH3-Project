@@ -13,11 +13,14 @@
 #include "Taeyeon/ItemComponent.h"
 #include "Stat/StatCalculater.h"
 #include "TPSGameInstance.h"
+#include "Manager/GameInstanceSubsystem/DataTableManager.h"
 #include "Manager/GameInstanceSubsystem/ObserverManager.h"
 #include "Manager/ObserverManager/MessageType.h"
 #include "Sound/SoundCue.h"
 #include "UI/CrosshairComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameData/ItemDataStruct.h"
+#include "GameData/WeaponAttachmentDataStruct.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -682,6 +685,30 @@ void AShooterCharacter::HandleItemUse(const FInventorySlot& SlotData)
 	}
 
 	InventoryComp->RemoveItem(SlotData.ItemName, 1);
+	
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UDataTableManager* DataTableManager = GameInstance->GetSubsystem<UDataTableManager>(ESubsystemType::DataTable);
+
+		FItemDataStruct* ItemData 
+			= DataTableManager
+			->GetTable(EDataType::Item)
+			->GetTable()
+			->FindRow<FItemDataStruct>(SlotData.ItemName, FString(TEXT("Find Row Context")));
+		if (ItemData->ItemType != EItemType::Attachment)
+		{
+			return;
+		}
+
+		FWeaponAttachmentDataStruct* AttachmentData 
+			= DataTableManager
+			->GetTable(EDataType::WeaponAttachment)
+			->GetTable()
+			->FindRow<FWeaponAttachmentDataStruct>(SlotData.ItemName, FString(TEXT("Find Row Context")));
+
+		GunActor->ChangeParts(AttachmentData->Index, AttachmentData->SlotType);
+	}
 }
 
 float AShooterCharacter::TakeDamage(

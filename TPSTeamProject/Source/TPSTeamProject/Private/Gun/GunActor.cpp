@@ -259,6 +259,13 @@ void AGunActor::ChangeParts(int32 Index, EAttachmentSlot InType)
 	EquipPartsMap[InType]->ChangeItem(Index);
 
 	StatCalculater->UpdateStat();
+	if (UWorld* World = GetWorld())
+	{
+		UTPSGameInstance* GameInstance = Cast<UTPSGameInstance>(World->GetGameInstance());
+		UObserverManager* ObserverManager = GameInstance->GetSubsystem<UObserverManager>(ESubsystemType::Observer);
+
+		ObserverManager->SendEvent(EMessageType::UpdateStat, -1);
+	}
 
 	UpdateMaxAmmoCount();
 }
