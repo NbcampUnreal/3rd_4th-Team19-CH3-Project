@@ -119,6 +119,10 @@ bool AGunActor::Fire()
 
 		AActor* CurrentCameraActor = CameraManager->GetViewTarget();
 		UCameraComponent* CurrentCameraComp = CurrentCameraActor->FindComponentByClass<UCameraComponent>();
+		if (!CurrentCameraComp)
+		{
+			return false;
+		}
 
 		const FVector& FireStartPointLocation = CurrentCameraComp->GetComponentLocation();
 		const FRotator& CurrentCameraRotater = CurrentCameraComp->GetComponentRotation();
